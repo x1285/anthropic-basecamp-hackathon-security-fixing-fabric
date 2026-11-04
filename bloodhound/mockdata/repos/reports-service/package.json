@@ -1,0 +1,8 @@
+{
+  "name": "reports-service",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "pdf-parse-lite": "1.4.0"
+  }
+}

@@ -1,0 +1,17 @@
+# secrets: never commit
+.env
+.env.*
+**/.env
+**/.env.*
+
+# dependencies and build output
+node_modules/
+.next/
+.work/
+.snapshots/
+test-results/
+playwright-report/
+
+# local logs and IDE state
+*.log
+.idea/

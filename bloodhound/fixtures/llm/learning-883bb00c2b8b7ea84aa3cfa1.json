@@ -1,0 +1,8 @@
+{
+  "task": "learning",
+  "model": "claude-haiku-5-5",
+  "input": "{\"signature\":\"jsonwebtoken|9.0.0|direct\",\"repoId\":\"billing-worker\",\"outcome\":\"green\",\"failedChecks\":[]}",
+  "output": {
+    "learning": "In billing-worker, the fix recipe of bumping the direct dependency jsonwebtoken to 9.0.0 turned the build green with no failed checks, so that single targeted upgrade was sufficient."
+  }
+}

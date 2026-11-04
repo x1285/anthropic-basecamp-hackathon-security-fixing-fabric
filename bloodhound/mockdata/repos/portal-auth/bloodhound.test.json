@@ -1,0 +1,13 @@
+{
+  "description": "Simulated test rules for portal-auth",
+  "greenWhen": {
+    "jsonwebtoken": ">=9.0.0"
+  },
+  "codeChecks": [
+    {
+      "file": "src/auth.js",
+      "pattern": "verify(",
+      "mustAlso": "algorithms"
+    }
+  ]
+}

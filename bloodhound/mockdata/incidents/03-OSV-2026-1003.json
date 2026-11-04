@@ -1,0 +1,30 @@
+{
+  "id": "OSV-2026-1003",
+  "summary": "jsonwebtoken: weak verification default (second report)",
+  "detectedAt": "2026-11-04T13:00:00Z",
+  "severity": "HIGH",
+  "database_specific": {
+    "severity": "HIGH"
+  },
+  "affected": [
+    {
+      "package": {
+        "ecosystem": "npm",
+        "name": "jsonwebtoken"
+      },
+      "ranges": [
+        {
+          "type": "SEMVER",
+          "events": [
+            {
+              "introduced": "0"
+            },
+            {
+              "fixed": "9.0.0"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

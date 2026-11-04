@@ -1,0 +1,9 @@
+{
+  "task": "grouping",
+  "model": "claude-haiku-5-5",
+  "input": "{\"signature\":\"jsonwebtoken|9.0.0|transitive\",\"packageName\":\"jsonwebtoken\",\"fixedVersion\":\"9.0.0\",\"strategy\":\"transitive\",\"repos\":[{\"id\":\"billing-api\",\"version\":\"8.5.0\",\"scopes\":[\"main\",\"billing-staging\",\"billing-prod\"]}]}",
+  "output": {
+    "rationale": "The billing-api repo pins jsonwebtoken at 8.5.0 through a transitive dependency, and versions before 9.0.0 have known JWT-handling vulnerabilities, so the same upgrade to 9.0.0 is needed across its main, billing-staging, and billing-prod scopes. Because the package enters indirectly, the fix must be applied by overriding or resolving the transitive version in each scope so that production and staging run the patched release.",
+    "confidence": 0.8
+  }
+}

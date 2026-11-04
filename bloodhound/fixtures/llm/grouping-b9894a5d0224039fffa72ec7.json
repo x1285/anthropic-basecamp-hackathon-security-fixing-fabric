@@ -1,0 +1,9 @@
+{
+  "task": "grouping",
+  "model": "claude-haiku-5-5",
+  "input": "{\"signature\":\"jsonwebtoken|9.0.0|direct\",\"packageName\":\"jsonwebtoken\",\"fixedVersion\":\"9.0.0\",\"strategy\":\"direct\",\"repos\":[{\"id\":\"billing-worker\",\"version\":\"8.5.1\",\"scopes\":[\"main\",\"billing-staging\"]},{\"id\":\"legacy-cms\",\"version\":\"7.4.0\",\"scopes\":[\"main\",\"portal-prod\"]},{\"id\":\"portal-auth\",\"version\":\"8.5.1\",\"scopes\":[\"portal-prod\"]},{\"id\":\"shop-api\",\"version\":\"8.5.1\",\"scopes\":[\"main\",\"webshop-staging\",\"webshop-prod\"]},{\"id\":\"shop-web\",\"version\":\"8.5.1\",\"scopes\":[\"main\",\"webshop-prod\"]}]}",
+  "output": {
+    "rationale": "Five repos pin jsonwebtoken directly at 8.5.1 or 7.4.0, below the fixed version 9.0.0, across main and production or staging scopes. A direct upgrade to 9.0.0 applies the same fix to each of them.",
+    "confidence": 0.8
+  }
+}

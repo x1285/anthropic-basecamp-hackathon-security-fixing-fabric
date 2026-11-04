@@ -1,0 +1,30 @@
+{
+  "id": "OSV-2026-1002",
+  "summary": "lodash: prototype pollution in merge helpers",
+  "detectedAt": "2026-11-04T09:30:00Z",
+  "severity": "HIGH",
+  "database_specific": {
+    "severity": "HIGH"
+  },
+  "affected": [
+    {
+      "package": {
+        "ecosystem": "npm",
+        "name": "lodash"
+      },
+      "ranges": [
+        {
+          "type": "SEMVER",
+          "events": [
+            {
+              "introduced": "0"
+            },
+            {
+              "fixed": "4.17.21"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

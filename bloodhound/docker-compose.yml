@@ -1,0 +1,18 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: bloodhound
+      POSTGRES_PASSWORD: bloodhound
+      POSTGRES_DB: bloodhound
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bloodhound"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    volumes:
+      - bloodhound-pg:/var/lib/postgresql/data
+volumes:
+  bloodhound-pg:

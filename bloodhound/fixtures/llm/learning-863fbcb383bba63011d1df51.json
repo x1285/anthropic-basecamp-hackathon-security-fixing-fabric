@@ -1,0 +1,8 @@
+{
+  "task": "learning",
+  "model": "claude-haiku-5-5",
+  "input": "{\"signature\":\"jsonwebtoken|9.0.0|transitive\",\"repoId\":\"billing-api\",\"outcome\":\"green\",\"failedChecks\":[]}",
+  "output": {
+    "learning": "In billing-api, the fix recipe for the transitive jsonwebtoken 9.0.0 signature finished green with no failed checks, so the approach worked for this transitive dependency in that repo."
+  }
+}

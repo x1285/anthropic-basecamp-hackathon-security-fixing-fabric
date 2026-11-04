@@ -1,0 +1,33 @@
+{
+  "name": "bloodhound",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10",
+  "scripts": {
+    "db:up": "docker compose up -d --wait",
+    "db:generate": "dotenv -e .env.local -- prisma generate",
+    "db:migrate": "dotenv -e .env.local -- prisma migrate deploy",
+    "db:migrate:dev": "dotenv -e .env.local -- prisma migrate dev",
+    "db:test:reset": "dotenv -e .env.test -- prisma migrate reset --force --skip-seed",
+    "seed": "dotenv -e .env.local -- tsx scripts/seed.ts",
+    "typecheck": "tsc -p packages/core/tsconfig.json --noEmit && tsc -p packages/adapters/tsconfig.json --noEmit && tsc -p packages/agent/tsconfig.json --noEmit && tsc -p packages/sandbox/tsconfig.json --noEmit && tsc -p packages/engine/tsconfig.json --noEmit && tsc -p apps/web/tsconfig.json --noEmit",
+    "test": "dotenv -e .env.test -- vitest run",
+    "gate": "tsx scripts/gate.ts",
+    "test:e2e": "dotenv -e .env.test -- playwright test",
+    "build:web": "cd apps/web && node node_modules/next/dist/bin/next build"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^26.6.6",
+    "dotenv-cli": "^11.1.0",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3",
+    "vitest": "^5.1.0"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.4.0",
+    "@prisma/client": "^6.19.3",
+    "prisma": "^6.19.3"
+  },
+  "type": "module"
+}

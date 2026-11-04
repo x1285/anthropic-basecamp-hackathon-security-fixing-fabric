@@ -1,0 +1,8 @@
+{
+  "task": "notice",
+  "model": "claude-haiku-5-5",
+  "input": "{\"incidentId\":\"OSV-2026-1001\",\"packageName\":\"jsonwebtoken\",\"severity\":\"CRITICAL\",\"envNames\":[\"Webshop staging\",\"Webshop prod\",\"Billing staging\",\"Billing prod\",\"Kundenportal prod\"],\"slaHours\":24}",
+  "output": {
+    "body": "Sicherheitshinweis zu Vorfall OSV-2026-1001\n\nWir haben eine kritische Sicherheitslücke (Schweregrad: CRITICAL) in der Softwarebibliothek jsonwebtoken identifiziert. Diese Bibliothek wird zur Erstellung und Prüfung von JSON-Web-Tokens (JWT) eingesetzt.\n\nBetroffene Umgebungen:\n- Webshop (Staging und Produktion)\n- Abrechnung (Staging und Produktion)\n- Kundenportal (Produktion)\n\nWir arbeiten mit Hochdruck an der Behebung. Die Schließung der Lücke ist innerhalb von 24 Stunden vorgesehen. Wir informieren Sie, sobald die Maßnahmen abgeschlossen sind.\n\nSollten Sie Fragen haben oder ungewöhnliche Aktivitäten feststellen, wenden Sie sich bitte umgehend an unser Sicherheitsteam."
+  }
+}

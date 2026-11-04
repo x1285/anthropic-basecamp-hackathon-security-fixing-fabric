@@ -1,0 +1,8 @@
+{
+  "task": "learning",
+  "model": "claude-haiku-5-5",
+  "input": "{\"signature\":\"jsonwebtoken|9.0.0|direct\",\"repoId\":\"portal-auth\",\"outcome\":\"green\",\"failedChecks\":[]}",
+  "output": {
+    "learning": "In the portal-auth repo, the direct upgrade to jsonwebtoken 9.0.0 passed all checks with no failures, so that change alone appears to be a sufficient fix recipe, though the record doesn't show what the original problem was."
+  }
+}

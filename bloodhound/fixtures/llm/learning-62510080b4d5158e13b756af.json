@@ -1,0 +1,8 @@
+{
+  "task": "learning",
+  "model": "claude-haiku-5-5",
+  "input": "{\"signature\":\"jsonwebtoken|9.0.0|direct\",\"repoId\":\"shop-web\",\"outcome\":\"green\",\"failedChecks\":[]}",
+  "output": {
+    "learning": "For shop-web, the jsonwebtoken 9.0.0 direct-dependency fix recipe passed all checks with no failures, so it can be reused for similar direct-dependency fixes in this repo."
+  }
+}

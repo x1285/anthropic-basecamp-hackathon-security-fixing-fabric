@@ -1,0 +1,205 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id           String        @id @default(uuid())
+  name         String
+  ownerTeam    String
+  repos        Repo[]
+  environments Environment[]
+}
+
+model Repo {
+  id          String   @id @default(uuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id])
+  name        String
+  framework   String
+  dirPath     String
+  direct      Json     // names of direct dependencies (package.json)
+  declared    Json     @default("{}") // declared ranges of direct deps
+  lock        Json     @default("{}") // resolved versions on main (updated on merge)
+  envIds      Json     // environments this repo is deployed to
+  @@index([projectId])
+}
+
+model Environment {
+  id              String   @id @default(uuid())
+  projectId       String
+  project         Project  @relation(fields: [projectId], references: [id])
+  name            String   // dev | staging | prod
+  pipelinePos     Int
+  release         String
+  deployedAt      DateTime
+  versions        Json     // { repoId: { pkg: version } } of the deployed release
+  rules           Json     // { slackChannel, pagingPolicy, slaFloorHours }
+  customers       CustomerEnvironment[]
+}
+
+model Customer {
+  id               String   @id @default(uuid())
+  name             String
+  tier             String
+  slaHours         Json     // { CRITICAL: 24, HIGH: 48, ... }
+  contacts         Json
+  optInNotAffected Boolean  @default(false)
+  environments     CustomerEnvironment[]
+}
+
+model CustomerEnvironment {
+  customerId    String
+  environmentId String
+  customer      Customer    @relation(fields: [customerId], references: [id])
+  environment   Environment @relation(fields: [environmentId], references: [id])
+  @@id([customerId, environmentId])
+}
+
+model Incident {
+  id           String   @id @default(uuid())
+  payload      Json     // OSV-style payload
+  packageName  String
+  fixedVersion String?
+  severity     String
+  detectedAt   DateTime
+  runs         Run[]
+}
+
+model Run {
+  id           String   @id @default(uuid())
+  incidentId   String
+  incident     Incident @relation(fields: [incidentId], references: [id])
+  status       String   @default("awaiting_approval") // awaiting_approval|grouping|fixing|awaiting_resolution|done
+  createdAt    DateTime @default(now())
+  scan         Json     @default("[]") // findings per repo/scope
+  slaByEnv     Json     @default("{}") // envId -> { hours, source }
+  groups       Group[]
+  messages     Message[]
+  attempts     FixAttempt[]
+  escalations  Escalation[]
+  repoStates   RepoState[]
+  pullRequests PullRequest[]
+}
+
+// Per-run state of every affected repo: open | fixed | escalated
+model RepoState {
+  id     String @id @default(uuid())
+  runId  String
+  run    Run    @relation(fields: [runId], references: [id])
+  repoId String
+  status String @default("open")
+  @@unique([runId, repoId])
+}
+
+model Group {
+  id         String   @id @default(uuid())
+  runId      String
+  run        Run      @relation(fields: [runId], references: [id])
+  signature  String   // package|fixedVersion|strategy
+  strategy   String   // direct | transitive
+  rationale  String
+  confidence Float
+  repoIds    Json
+  status     String   @default("open") // open|piloting|fixed|escalated
+  pilotFailures Int   @default(0)
+  recipeId   String?
+  recipe     Recipe?  @relation(fields: [recipeId], references: [id])
+  attempts   FixAttempt[]
+}
+
+// Memory: one recipe per signature, reused across runs
+model Recipe {
+  id           String   @id @default(uuid())
+  signature    String   @unique
+  strategy     String
+  steps        Json     // [{action, name, to}]
+  breaking     Json
+  verification Json
+  complexity   String   // S|M|L
+  confidence   Float
+  version      Int      @default(1)
+  versions     RecipeVersion[]
+  groups       Group[]
+}
+
+model RecipeVersion {
+  id        String   @id @default(uuid())
+  recipeId  String
+  recipe    Recipe   @relation(fields: [recipeId], references: [id])
+  version   Int
+  steps     Json
+  learning  String
+  createdAt DateTime @default(now())
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  runId      String
+  run        Run      @relation(fields: [runId], references: [id])
+  kind       String   // incident_notice | outbox_copy | resolution_notice
+  customerId String?
+  environmentId String?
+  body       String
+  status     String   // pending | approved | sent
+  createdAt  DateTime @default(now())
+}
+
+model FixAttempt {
+  id         String   @id @default(uuid())
+  runId      String
+  run        Run      @relation(fields: [runId], references: [id])
+  groupId    String
+  group      Group    @relation(fields: [groupId], references: [id])
+  repoId     String
+  attemptNo  Int
+  outcome    String   // green | red
+  log        Json
+  diff       String   @default("")
+  createdAt  DateTime @default(now())
+  pr         PullRequest?
+}
+
+model PullRequest {
+  id         String     @id @default(uuid())
+  attemptId  String     @unique
+  attempt    FixAttempt @relation(fields: [attemptId], references: [id])
+  runId      String
+  run        Run        @relation(fields: [runId], references: [id])
+  repoId     String
+  title      String
+  diff       String
+  checks     Json
+  status     String     @default("open") // open | merged
+  recipeVersion Int
+  createdAt  DateTime   @default(now())
+}
+
+model Escalation {
+  id        String   @id @default(uuid())
+  runId     String
+  run       Run      @relation(fields: [runId], references: [id])
+  repoId    String?
+  groupId   String?
+  reason    String
+  ticket    Json
+  createdAt DateTime @default(now())
+}
+
+model Flag {
+  name    String  @id
+  enabled Boolean
+}
+
+model AuditLog {
+  id     String   @id @default(cuid())
+  at     DateTime @default(now())
+  actor  String
+  action String
+  target String
+  detail Json     @default("{}")
+}

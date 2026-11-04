@@ -1,0 +1,258 @@
+[
+  {
+    "id": "C01",
+    "name": "Nordlicht Handel",
+    "tier": "gold",
+    "slaHours": {
+      "CRITICAL": 24,
+      "HIGH": 48,
+      "MEDIUM": 120,
+      "LOW": 336
+    },
+    "contacts": [
+      {
+        "name": "IT-Leitung Nordlicht Handel",
+        "email": "ops@nordlicht-handel.example.com"
+      }
+    ],
+    "optInNotAffected": true,
+    "environments": [
+      "webshop-prod",
+      "webshop-staging",
+      "logistics-prod"
+    ]
+  },
+  {
+    "id": "C02",
+    "name": "Bäckerei Krüger",
+    "tier": "standard",
+    "slaHours": {
+      "CRITICAL": 72,
+      "HIGH": 168,
+      "MEDIUM": 336,
+      "LOW": 720
+    },
+    "contacts": [
+      {
+        "name": "IT-Leitung Bäckerei Krüger",
+        "email": "ops@b-ckerei-kr-ger.example.com"
+      }
+    ],
+    "optInNotAffected": false,
+    "environments": [
+      "webshop-prod"
+    ]
+  },
+  {
+    "id": "C03",
+    "name": "Stadtwerke Lindau",
+    "tier": "silver",
+    "slaHours": {
+      "CRITICAL": 48,
+      "HIGH": 96,
+      "MEDIUM": 168,
+      "LOW": 504
+    },
+    "contacts": [
+      {
+        "name": "IT-Leitung Stadtwerke Lindau",
+        "email": "ops@stadtwerke-lindau.example.com"
+      }
+    ],
+    "optInNotAffected": false,
+    "environments": [
+      "webshop-prod",
+      "billing-prod"
+    ]
+  },
+  {
+    "id": "C04",
+    "name": "Aurora Versicherung",
+    "tier": "gold",
+    "slaHours": {
+      "CRITICAL": 24,
+      "HIGH": 48,
+      "MEDIUM": 120,
+      "LOW": 336
+    },
+    "contacts": [
+      {
+        "name": "IT-Leitung Aurora Versicherung",
+        "email": "ops@aurora-versicherung.example.com"
+      }
+    ],
+    "optInNotAffected": false,
+    "environments": [
+      "billing-prod"
+    ]
+  },
+  {
+    "id": "C05",
+    "name": "Mobilfunk Ost",
+    "tier": "silver",
+    "slaHours": {
+      "CRITICAL": 48,
+      "HIGH": 96,
+      "MEDIUM": 168,
+      "LOW": 504
+    },
+    "contacts": [
+      {
+        "name": "IT-Leitung Mobilfunk Ost",
+        "email": "ops@mobilfunk-ost.example.com"
+      }
+    ],
+    "optInNotAffected": false,
+    "environments": [
+      "billing-prod"
+    ]
+  },
+  {
+    "id": "C06",
+    "name": "Klinikverbund Rhein",
+    "tier": "gold",
+    "slaHours": {
+      "CRITICAL": 24,
+      "HIGH": 48,
+      "MEDIUM": 120,
+      "LOW": 336
+    },
+    "contacts": [
+      {
+        "name": "IT-Leitung Klinikverbund Rhein",
+        "email": "ops@klinikverbund-rhein.example.com"
+      }
+    ],
+    "optInNotAffected": false,
+    "environments": [
+      "portal-prod"
+    ]
+  },
+  {
+    "id": "C07",
+    "name": "Schulverband Nord",
+    "tier": "standard",
+    "slaHours": {
+      "CRITICAL": 72,
+      "HIGH": 168,
+      "MEDIUM": 336,
+      "LOW": 720
+    },
+    "contacts": [
+      {
+        "name": "IT-Leitung Schulverband Nord",
+        "email": "ops@schulverband-nord.example.com"
+      }
+    ],
+    "optInNotAffected": false,
+    "environments": [
+      "portal-prod"
+    ]
+  },
+  {
+    "id": "C08",
+    "name": "Hansa Logistik",
+    "tier": "silver",
+    "slaHours": {
+      "CRITICAL": 48,
+      "HIGH": 96,
+      "MEDIUM": 168,
+      "LOW": 504
+    },
+    "contacts": [
+      {
+        "name": "IT-Leitung Hansa Logistik",
+        "email": "ops@hansa-logistik.example.com"
+      }
+    ],
+    "optInNotAffected": false,
+    "environments": [
+      "logistics-prod",
+      "logistics-staging"
+    ]
+  },
+  {
+    "id": "C09",
+    "name": "Frachtwerk Süd",
+    "tier": "standard",
+    "slaHours": {
+      "CRITICAL": 72,
+      "HIGH": 168,
+      "MEDIUM": 336,
+      "LOW": 720
+    },
+    "contacts": [
+      {
+        "name": "IT-Leitung Frachtwerk Süd",
+        "email": "ops@frachtwerk-s-d.example.com"
+      }
+    ],
+    "optInNotAffected": false,
+    "environments": [
+      "logistics-prod"
+    ]
+  },
+  {
+    "id": "C10",
+    "name": "Stadtbibliothek Weiden",
+    "tier": "standard",
+    "slaHours": {
+      "CRITICAL": 72,
+      "HIGH": 168,
+      "MEDIUM": 336,
+      "LOW": 720
+    },
+    "contacts": [
+      {
+        "name": "IT-Leitung Stadtbibliothek Weiden",
+        "email": "ops@stadtbibliothek-weiden.example.com"
+      }
+    ],
+    "optInNotAffected": false,
+    "environments": [
+      "portal-prod"
+    ]
+  },
+  {
+    "id": "C11",
+    "name": "Energiehaus Mitte",
+    "tier": "silver",
+    "slaHours": {
+      "CRITICAL": 48,
+      "HIGH": 96,
+      "MEDIUM": 168,
+      "LOW": 504
+    },
+    "contacts": [
+      {
+        "name": "IT-Leitung Energiehaus Mitte",
+        "email": "ops@energiehaus-mitte.example.com"
+      }
+    ],
+    "optInNotAffected": false,
+    "environments": [
+      "webshop-staging"
+    ]
+  },
+  {
+    "id": "C12",
+    "name": "Vogelsang Reisen",
+    "tier": "standard",
+    "slaHours": {
+      "CRITICAL": 72,
+      "HIGH": 168,
+      "MEDIUM": 336,
+      "LOW": 720
+    },
+    "contacts": [
+      {
+        "name": "IT-Leitung Vogelsang Reisen",
+        "email": "ops@vogelsang-reisen.example.com"
+      }
+    ],
+    "optInNotAffected": false,
+    "environments": [
+      "webshop-prod"
+    ]
+  }
+]

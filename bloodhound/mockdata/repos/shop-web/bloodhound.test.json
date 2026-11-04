@@ -1,0 +1,7 @@
+{
+  "description": "Simulated test rules for shop-web",
+  "greenWhen": {
+    "jsonwebtoken": ">=9.0.0"
+  },
+  "codeChecks": []
+}

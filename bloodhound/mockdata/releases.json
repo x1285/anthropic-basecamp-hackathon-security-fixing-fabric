@@ -1,0 +1,127 @@
+{
+  "webshop-dev": {
+    "release": "webshop-dev-2026.10.03",
+    "deployedAt": "2026-10-28T09:00:00Z",
+    "versions": {}
+  },
+  "webshop-staging": {
+    "release": "webshop-staging-2026.10.04",
+    "deployedAt": "2026-10-28T09:00:00Z",
+    "versions": {
+      "shop-api": {
+        "express": "4.18.2",
+        "jsonwebtoken": "8.5.1"
+      }
+    }
+  },
+  "webshop-prod": {
+    "release": "webshop-prod-2026.10.05",
+    "deployedAt": "2026-10-28T09:00:00Z",
+    "versions": {
+      "shop-api": {
+        "express": "4.18.2",
+        "jsonwebtoken": "8.5.1"
+      },
+      "shop-web": {
+        "next": "14.2.3",
+        "jsonwebtoken": "8.5.1"
+      }
+    }
+  },
+  "billing-dev": {
+    "release": "billing-dev-2026.10.03",
+    "deployedAt": "2026-10-28T09:00:00Z",
+    "versions": {}
+  },
+  "billing-staging": {
+    "release": "billing-staging-2026.10.04",
+    "deployedAt": "2026-10-28T09:00:00Z",
+    "versions": {
+      "billing-api": {
+        "express": "4.18.2",
+        "express-jwt": "6.0.0",
+        "jsonwebtoken": "8.5.0"
+      },
+      "billing-worker": {
+        "jsonwebtoken": "8.5.1",
+        "bullmq": "5.12.0"
+      }
+    }
+  },
+  "billing-prod": {
+    "release": "billing-prod-2026.10.05",
+    "deployedAt": "2026-10-28T09:00:00Z",
+    "versions": {
+      "billing-api": {
+        "express": "4.18.2",
+        "express-jwt": "6.0.0",
+        "jsonwebtoken": "8.5.0"
+      }
+    }
+  },
+  "portal-dev": {
+    "release": "portal-dev-2026.10.03",
+    "deployedAt": "2026-10-28T09:00:00Z",
+    "versions": {
+      "portal-auth": {
+        "express": "4.18.2",
+        "jsonwebtoken": "9.0.0"
+      }
+    }
+  },
+  "portal-staging": {
+    "release": "portal-staging-2026.10.04",
+    "deployedAt": "2026-10-28T09:00:00Z",
+    "versions": {}
+  },
+  "portal-prod": {
+    "release": "portal-prod-2026.10.05",
+    "deployedAt": "2026-10-28T09:00:00Z",
+    "versions": {
+      "portal-auth": {
+        "express": "4.18.2",
+        "jsonwebtoken": "8.5.1"
+      },
+      "portal-frontend": {
+        "react": "18.3.1",
+        "lodash": "4.17.21"
+      },
+      "legacy-cms": {
+        "express": "4.17.1",
+        "jsonwebtoken": "7.4.0"
+      }
+    }
+  },
+  "logistics-dev": {
+    "release": "logistics-dev-2026.10.03",
+    "deployedAt": "2026-10-28T09:00:00Z",
+    "versions": {}
+  },
+  "logistics-staging": {
+    "release": "logistics-staging-2026.10.04",
+    "deployedAt": "2026-10-28T09:00:00Z",
+    "versions": {
+      "logistics-notify": {
+        "lodash": "4.17.19",
+        "nodemailer": "6.9.13"
+      }
+    }
+  },
+  "logistics-prod": {
+    "release": "logistics-prod-2026.10.05",
+    "deployedAt": "2026-10-28T09:00:00Z",
+    "versions": {
+      "logistics-tracker": {
+        "express": "4.18.2",
+        "lodash": "4.17.20"
+      },
+      "logistics-notify": {
+        "lodash": "4.17.21",
+        "nodemailer": "6.9.13"
+      },
+      "reports-service": {
+        "pdf-parse-lite": "1.4.0"
+      }
+    }
+  }
+}

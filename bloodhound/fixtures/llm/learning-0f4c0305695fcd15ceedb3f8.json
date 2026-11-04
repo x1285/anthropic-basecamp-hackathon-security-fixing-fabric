@@ -1,0 +1,8 @@
+{
+  "task": "learning",
+  "model": "claude-haiku-5-5",
+  "input": "{\"signature\":\"jsonwebtoken|9.0.0|direct\",\"repoId\":\"shop-api\",\"outcome\":\"green\",\"failedChecks\":[]}",
+  "output": {
+    "learning": "In the shop-api repo, the fix recipe involving a direct dependency on jsonwebtoken 9.0.0 produced a green outcome with no failed checks, so that single direct-dependency change was sufficient there."
+  }
+}

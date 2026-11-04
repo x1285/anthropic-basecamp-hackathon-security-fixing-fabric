@@ -1,0 +1,8 @@
+{
+  "task": "learning",
+  "model": "claude-haiku-5-5",
+  "input": "{\"signature\":\"jsonwebtoken|9.0.0|direct\",\"repoId\":\"legacy-cms\",\"outcome\":\"red\",\"failedChecks\":[\"\\\"verify(\\\" without \\\"algorithms\\\"\"]}",
+  "output": {
+    "learning": "In legacy-cms (jsonwebtoken 9.0.0), the red outcome came from a `verify(` call missing an explicit `algorithms` option, so the fix recipe is to pin the expected algorithm(s), such as `algorithms: ['HS256']`, in every `jwt.verify` call."
+  }
+}

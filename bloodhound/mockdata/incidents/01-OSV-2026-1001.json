@@ -1,0 +1,30 @@
+{
+  "id": "OSV-2026-1001",
+  "summary": "jsonwebtoken: forged tokens accepted when algorithm is not pinned",
+  "detectedAt": "2026-11-04T08:00:00Z",
+  "severity": "CRITICAL",
+  "database_specific": {
+    "severity": "CRITICAL"
+  },
+  "affected": [
+    {
+      "package": {
+        "ecosystem": "npm",
+        "name": "jsonwebtoken"
+      },
+      "ranges": [
+        {
+          "type": "SEMVER",
+          "events": [
+            {
+              "introduced": "0"
+            },
+            {
+              "fixed": "9.0.0"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

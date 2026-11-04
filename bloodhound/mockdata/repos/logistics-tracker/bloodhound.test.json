@@ -1,0 +1,7 @@
+{
+  "description": "Simulated test rules for logistics-tracker",
+  "greenWhen": {
+    "lodash": ">=4.17.21"
+  },
+  "codeChecks": []
+}
