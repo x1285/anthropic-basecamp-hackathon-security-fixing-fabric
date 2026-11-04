@@ -1,6 +1,6 @@
-import { seed } from '../packages/engine/src/seed.js';
-import { prisma } from '../packages/engine/src/db.js';
+// Loads the demo world into the database (dev or test, depending on DATABASE_URL).
+import { disconnect, seedDatabase } from '../packages/engine/src/index';
 
-const counts = await seed();
+const counts = await seedDatabase();
 console.log(`seeded: ${JSON.stringify(counts)}`);
-await prisma.$disconnect();
+await disconnect();

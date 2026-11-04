@@ -1,9 +1,0 @@
-{
-  "name": "logistics-tracker",
-  "version": "1.0.0",
-  "private": true,
-  "dependencies": {
-    "express": "4.18.2",
-    "lodash": "4.17.20"
-  }
-}

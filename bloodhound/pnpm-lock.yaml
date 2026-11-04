@@ -81,21 +81,6 @@ importers:
 
   packages/engine:
     dependencies:
-      '@bloodhound/adapters':
-        specifier: workspace:*
-        version: link:../adapters
-      '@bloodhound/agent':
-        specifier: workspace:*
-        version: link:../agent
-      '@bloodhound/core':
-        specifier: workspace:*
-        version: link:../core
-      '@bloodhound/sandbox':
-        specifier: workspace:*
-        version: link:../sandbox
-
-  packages/sandbox:
-    dependencies:
       '@bloodhound/core':
         specifier: workspace:*
         version: link:../core

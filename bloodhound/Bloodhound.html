@@ -1,0 +1,1453 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bloodhound</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E8ECF0;--surface:#FFFFFF;--sunk:#F2F4F7;--ink:#17202B;--muted:#586473;--line:#CBD3DC;
+  --accent:#2846C4;--accent-ink:#FFFFFF;
+  --crit:#B0123A;--high:#BC4C0B;--med:#8A6D00;--low:#346886;--ok:#257047;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F141B;--surface:#171E28;--sunk:#121821;--ink:#E3E8EE;--muted:#93A0AE;--line:#2A3542;
+    --accent:#8198FF;--accent-ink:#0F141B;
+    --crit:#FF6A88;--high:#FF9B5A;--med:#E5C452;--low:#7FB4D8;--ok:#5FCB8D;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F141B;--surface:#171E28;--sunk:#121821;--ink:#E3E8EE;--muted:#93A0AE;--line:#2A3542;
+  --accent:#8198FF;--accent-ink:#0F141B;
+  --crit:#FF6A88;--high:#FF9B5A;--med:#E5C452;--low:#7FB4D8;--ok:#5FCB8D;
+  color-scheme:dark;
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Schibsted Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.mono{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+.bar{display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding:14px 0 0}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:22px;letter-spacing:-.02em}
+.brand svg{width:26px;height:26px;color:var(--accent)}
+.status{margin-left:auto;display:flex;align-items:center;gap:8px;color:var(--muted);font-size:14px}
+.live{width:9px;height:9px;border-radius:50%;background:var(--ok);animation:pulse 2.4s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--ok) 55%,transparent)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+@media (prefers-reduced-motion:reduce){.live{animation:none}}
+nav{display:flex;gap:4px;margin-top:10px;overflow-x:auto}
+nav a{padding:10px 14px;text-decoration:none;color:var(--muted);font-weight:500;border-bottom:3px solid transparent;white-space:nowrap}
+nav a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--accent)}
+nav .count{display:inline-block;min-width:20px;padding:0 6px;margin-left:6px;border-radius:10px;background:var(--sunk);border:1px solid var(--line);font-size:12px;text-align:center}
+
+.view{display:none;padding:24px 0 48px}
+.view.on{display:block}
+.intro{max-width:70ch;margin:0 0 20px;color:var(--muted)}
+.intro h1{margin:0 0 4px;font-size:28px;line-height:1.15;letter-spacing:-.02em;color:var(--ink)}
+.cols{display:grid;grid-template-columns:minmax(260px,320px) minmax(0,1fr);gap:20px;align-items:start}
+.cols.even{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}
+@media (max-width:860px){.cols,.cols.even{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;min-width:0}
+.panel h2{margin:0 0 12px;font-size:17px;letter-spacing:-.01em}
+.panel h3{margin:20px 0 8px;font-size:15px}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 14px;border-radius:6px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-weight:500;text-decoration:none}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{color:var(--crit)}
+.btn.sm{padding:5px 10px;font-size:13px}
+.btn.fire{background:var(--ink);color:var(--surface);border-color:var(--ink);font-size:17px;font-weight:700;padding:14px 22px;width:100%;border-radius:8px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+.repo-list{display:flex;flex-direction:column;gap:6px;margin:12px 0 0;padding:0;list-style:none}
+.repo-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);cursor:pointer;text-align:left;width:100%}
+.repo-item[aria-current="true"]{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.repo-item .nm{font-weight:700;display:block}
+.repo-item .meta{font-size:13px;color:var(--muted)}
+.repo-item .grow{flex:1;min-width:0}
+.eco{display:inline-block;padding:1px 7px;border-radius:4px;font-size:12px;font-weight:500;background:var(--sunk);border:1px solid var(--line)}
+.switch{position:relative;display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);cursor:pointer;white-space:nowrap}
+.switch input{appearance:none;width:34px;height:20px;border-radius:10px;background:var(--line);position:relative;cursor:pointer;margin:0;transition:background .15s;flex:none}
+.switch input::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--surface);transition:transform .15s}
+.switch input:checked{background:var(--accent)}
+.switch input:checked::after{transform:translateX(14px)}
+
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;margin-bottom:14px}
+.seg button{border:0;background:transparent;padding:8px 14px;cursor:pointer;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--sunk);color:var(--ink);font-weight:700}
+
+label.f{display:block;margin:0 0 12px}
+label.f span{display:block;font-size:13px;font-weight:500;margin-bottom:4px}
+.f input,.f select,.f textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:6px;background:var(--sunk)}
+.f textarea{min-height:200px;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:13px;resize:vertical}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 10px}
+@media (max-width:520px){.grid2{grid-template-columns:1fr}.grid4{grid-template-columns:1fr 1fr}}
+.err{color:var(--crit);font-size:14px;margin:8px 0 0}
+.check{display:flex;align-items:center;gap:8px;font-size:14px;margin:0 0 8px;cursor:pointer}
+.check input{width:16px;height:16px;accent-color:var(--accent)}
+
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:middle}
+th{font-weight:500;color:var(--muted);background:var(--sunk);font-size:13px}
+tbody tr:last-child td{border-bottom:0}
+td input.cell{width:100%;min-width:92px;padding:4px 6px;border:1px solid transparent;border-radius:4px;background:transparent;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12.5px}
+td input.cell:hover,td input.cell:focus{border-color:var(--line);background:var(--sunk)}
+td.drift input.cell{color:var(--high);font-weight:500}
+td.off{opacity:.4}
+th.envh{min-width:120px}
+th .release{display:block;margin-top:4px;width:100%;padding:3px 6px;border:1px solid var(--line);border-radius:4px;background:var(--surface);font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12px;font-weight:400}
+th .switch{margin-top:6px;font-weight:400}
+
+.presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:16px;padding:6px 12px;cursor:pointer;font-size:13px}
+.chip:hover{border-color:var(--accent)}
+.sev{display:inline-block;padding:1px 8px;border-radius:4px;font-size:12px;font-weight:700}
+.sev.critical{color:var(--crit);background:color-mix(in srgb,var(--crit) 14%,transparent)}
+.sev.high{color:var(--high);background:color-mix(in srgb,var(--high) 14%,transparent)}
+.sev.medium{color:var(--med);background:color-mix(in srgb,var(--med) 16%,transparent)}
+.sev.low{color:var(--low);background:color-mix(in srgb,var(--low) 14%,transparent)}
+pre.code{margin:0;padding:14px;background:var(--sunk);border:1px solid var(--line);border-radius:8px;overflow:auto;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12.5px;line-height:1.55;max-height:460px;white-space:pre}
+.targets{margin:14px 0;padding:12px;border:1px dashed var(--line);border-radius:8px;font-size:14px}
+.targets p{margin:0 0 4px}
+
+.pipeline{display:flex;flex-direction:column;gap:14px}
+.env-card .head{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.env-card .pos{font-size:13px;color:var(--muted)}
+.env-card .name{font-size:18px;font-weight:700;padding:4px 8px;border:1px solid transparent;border-radius:6px;background:transparent;width:180px}
+.env-card .name:hover,.env-card .name:focus{border-color:var(--line);background:var(--sunk)}
+.env-card .spacer{flex:1}
+.env-card fieldset{border:0;padding:0;margin:0 0 10px}
+.env-card legend{font-size:13px;font-weight:500;margin-bottom:6px;padding:0}
+
+.run-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.run-item{width:100%;text-align:left;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);cursor:pointer}
+.run-item[aria-current="true"]{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.run-item .t{font-weight:700;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tally{font-size:13px;color:var(--muted)}
+.tally b{color:var(--crit)}
+
+.log{margin:0 0 18px;padding:14px 16px;background:var(--ink);color:var(--surface);border-radius:8px;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:13px;line-height:1.7;min-height:60px;overflow-x:auto}
+.log div{white-space:pre}
+.log .hit{color:color-mix(in srgb,var(--crit) 55%,var(--surface))}
+.log .warn{color:color-mix(in srgb,var(--med) 60%,var(--surface))}
+.log .dim{opacity:.6}
+.results{display:flex;flex-direction:column;gap:10px}
+.res{border:1px solid var(--line);border-left-width:5px;border-radius:8px;padding:12px 14px;background:var(--surface);transition:opacity .35s,transform .35s}
+.res.affected{border-left-color:var(--crit)}
+.res.unknown{border-left-color:var(--med)}
+.res.patched{border-left-color:var(--ok)}
+.res.clear{border-left-color:var(--line)}
+.res.pending{opacity:0;transform:translateY(6px)}
+.res .h{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.res .h strong{font-size:16px}
+.verdict{font-size:13px;font-weight:700}
+.affected>.h .verdict{color:var(--crit)}.unknown>.h .verdict{color:var(--med)}.patched>.h .verdict{color:var(--ok)}.clear>.h .verdict{color:var(--muted)}
+.res p{margin:4px 0 0;font-size:14px}
+.sla{margin-left:auto;font-size:13px;font-weight:500;padding:2px 8px;border-radius:4px;background:var(--sunk);border:1px solid var(--line)}
+.envs{display:flex;gap:0;margin-top:10px;overflow-x:auto;border:1px solid var(--line);border-radius:6px}
+.envs .e{flex:1;min-width:110px;padding:6px 10px;border-right:1px solid var(--line);font-size:12.5px}
+.envs .e:last-child{border-right:0}
+.envs .e b{display:block;font-size:13px}
+.envs .e .v{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12px;color:var(--muted)}
+.envs .e.affected{background:color-mix(in srgb,var(--crit) 10%,transparent)}
+.envs .e.affected .st{color:var(--crit);font-weight:700}
+.envs .e.unknown .st{color:var(--med);font-weight:700}
+.envs .e.patched .st{color:var(--ok)}
+.envs .e.none .st{color:var(--muted)}
+.acts{margin-top:10px}
+.acts .row button[aria-pressed="true"]{background:var(--sunk);border-color:var(--muted)}
+.acts pre{margin-top:8px}
+details summary{cursor:pointer;color:var(--muted);font-size:14px;margin-top:18px}
+details pre{margin-top:8px}
+
+.empty{padding:28px;text-align:center;color:var(--muted)}
+.empty p{margin:0 0 12px}
+footer{max-width:1180px;margin:0 auto;padding:0 20px 32px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:13px}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--surface);padding:10px 16px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:20}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.pill{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;font-weight:700;border:1px solid var(--line);background:var(--sunk);color:var(--muted);white-space:nowrap}
+.pill.ok{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 40%,transparent);background:color-mix(in srgb,var(--ok) 10%,transparent)}
+.pill.warn{color:var(--med);border-color:color-mix(in srgb,var(--med) 40%,transparent);background:color-mix(in srgb,var(--med) 10%,transparent)}
+.pill.bad{color:var(--crit);border-color:color-mix(in srgb,var(--crit) 40%,transparent);background:color-mix(in srgb,var(--crit) 10%,transparent)}
+.pill.info{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,transparent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.proj{margin:0;padding:0;list-style:none}
+.proj > li{margin-bottom:10px}
+.proj .sub{list-style:none;margin:6px 0 0 14px;padding:0 0 0 10px;border-left:2px solid var(--line);display:flex;flex-direction:column;gap:6px}
+.proj-item{display:block;width:100%;text-align:left;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);cursor:pointer}
+.proj-item[aria-current="true"]{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.proj-item .nm{font-weight:800;display:block}
+.proj-item .meta{font-size:13px;color:var(--muted)}
+.cchip{display:inline-flex;align-items:center;gap:4px;padding:2px 4px 2px 8px;margin:2px 4px 2px 0;border:1px solid var(--line);border-radius:12px;font-size:13px;background:var(--sunk)}
+.cchip button{border:0;background:transparent;cursor:pointer;color:var(--muted);padding:0 4px;font-size:14px;line-height:1}
+.tier{font-size:11px;font-weight:700;color:var(--muted)}
+td select.add,td select.inl,td input.inl{padding:3px 6px;border:1px solid var(--line);border-radius:4px;background:var(--surface);font-size:13px}
+td input.inl{width:100%;min-width:64px}
+td input.num{width:70px}
+.slac{font-size:13px}
+.slac small{display:block;color:var(--muted);font-size:11.5px}
+.headline{font-size:18px;font-weight:700;margin:0 0 4px;letter-spacing:-.01em}
+.stepnav{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 18px}
+.stepnav button{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:16px;padding:4px 10px 4px 4px;cursor:pointer;font-size:13px}
+.stepnav b{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--sunk);font-size:12px}
+.stepnav .done b{background:var(--ok);color:var(--surface)}
+.stepnav .wait b{background:var(--med);color:var(--surface)}
+.stepnav .bad b{background:var(--crit);color:var(--surface)}
+.step{border-top:1px solid var(--line);padding:18px 0 6px}
+.step > .sh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.step > .sh h3{margin:0;font-size:17px}
+.step > .sh .n{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;border:1px solid var(--line);font-weight:700;font-size:13px}
+.gcard{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:10px}
+.gcard .h{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:4px}
+.gcard p{margin:4px 0;font-size:14px}
+.gcard ol,.gcard ul{margin:6px 0 0;padding-left:20px;font-size:14px}
+.learn{margin-top:8px;padding:8px 10px;border-left:3px solid var(--accent);background:var(--sunk);border-radius:0 6px 6px 0;font-size:13.5px}
+.learn div + div{margin-top:4px}
+.fixrow{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:8px}
+.fixrow .h{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.fixrow .log{margin:8px 0 0;padding:8px 10px;min-height:0;font-size:12px;line-height:1.6}
+.outbox details{border:1px solid var(--line);border-radius:6px;padding:6px 10px;margin-bottom:6px;font-size:14px}
+.outbox summary{cursor:pointer;margin:0;color:var(--ink)}
+.outbox pre{margin-top:6px}
+textarea.tpl{width:100%;min-height:190px;padding:10px;border:1px solid var(--line);border-radius:6px;background:var(--sunk);font:13px/1.5 "JetBrains Mono",ui-monospace,monospace;resize:vertical}
+input.tpl{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--sunk)}
+.note{font-size:13px;color:var(--muted);margin:6px 0}
+.projblock{margin-bottom:14px}
+.projblock h4{margin:0 0 8px;font-size:15px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="bar">
+      <div class="brand">
+        <svg viewBox="0 0 32 32" aria-hidden="true" fill="currentColor"><ellipse cx="16" cy="21" rx="7" ry="6"/><ellipse cx="7" cy="13" rx="3" ry="4"/><ellipse cx="25" cy="13" rx="3" ry="4"/><ellipse cx="12" cy="6.5" rx="2.8" ry="3.8"/><ellipse cx="20" cy="6.5" rx="2.8" ry="3.8"/></svg>
+        Bloodhound
+      </div>
+      <div class="status"><span class="live" aria-hidden="true"></span><span id="status-text"></span></div>
+    </div>
+    <nav aria-label="Sections">
+      <a href="#projects" data-view="projects">Projects</a>
+      <a href="#customers" data-view="customers">Customers</a>
+      <a href="#environments" data-view="environments">Environments</a>
+      <a href="#lab" data-view="lab">Incident lab</a>
+      <a href="#runs" data-view="runs">Runs<span class="count" id="run-count">0</span></a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="view" id="v-projects">
+    <div class="intro">
+      <h1>Projects</h1>
+      A project has repos and environments, and each environment serves one or more customers. Switch on <em>Watch</em> for the repos Bloodhound should check when an incident comes in.
+    </div>
+    <div class="cols">
+      <div>
+        <button class="btn primary" data-act="add-project" style="width:100%">Add a project</button>
+        <ul class="proj" id="proj-list" style="margin-top:12px"></ul>
+      </div>
+      <div class="panel" id="proj-panel"></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-customers">
+    <div class="intro">
+      <h1>Customers</h1>
+      Each customer’s contract sets its SLA per severity. An environment’s deadline is the strictest SLA among the customers on it.
+    </div>
+    <div class="panel"><div id="cust-table"></div>
+      <div class="row" style="margin-top:12px"><button class="btn" data-act="add-customer">Add customer</button></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-environments">
+    <div class="intro">
+      <h1>Environments</h1>
+      Order environments the way releases move through them. Their rules decide who gets alerted. The fallback SLA applies only when no customer is on the environment.
+    </div>
+    <div class="pipeline" id="env-list"></div>
+    <div class="row" style="margin-top:14px"><button class="btn" data-act="env-add">Add environment</button></div>
+  </section>
+
+  <section class="view" id="v-lab">
+    <div class="intro">
+      <h1>Incident lab</h1>
+      Write a fake security incident and fire the hook. The payload on the right is exactly what the real hook will receive.
+    </div>
+    <div class="cols even">
+      <div class="panel" id="lab-form"></div>
+      <div class="panel">
+        <div class="row" style="justify-content:space-between;margin-bottom:12px">
+          <h2 style="margin:0">Hook payload</h2>
+          <button class="btn" data-act="copy-payload">Copy JSON</button>
+        </div>
+        <pre class="code" id="payload"></pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="view" id="v-runs">
+    <div class="intro">
+      <h1>Runs</h1>
+      Each incident runs through the 8 steps. Approve the customer text, then work through the fixes in priority order.
+    </div>
+    <div class="cols">
+      <ul class="run-list" id="run-list"></ul>
+      <div class="panel" id="run-panel"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span>Demo data lives in this browser only. Grouping and fixing are simulated in this mock; the real Routine uses an LLM and a sandbox.</span>
+  <button class="btn" data-act="reset">Reset demo data</button>
+</footer>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const KEY = 'bloodhound-demo-v3';
+const ECOS = ['npm', 'PyPI', 'Go'];
+const SEVS = ['critical', 'high', 'medium', 'low'];
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Math.random().toString(36).slice(2, 9);
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const clone = o => JSON.parse(JSON.stringify(o));
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const listText = a => a.length <= 1 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
+const uniq = a => [...new Set(a)];
+const dnum = v => v == null ? Infinity : v;
+const ncmp = (a, b) => a === b ? 0 : a < b ? -1 : 1;
+
+/* ---------- versions ---------- */
+function parseV(v) {
+  const m = String(v || '').match(/(\d+)(?:\.(\d+))?(?:\.(\d+))?/);
+  return m ? [+m[1], +(m[2] || 0), +(m[3] || 0)] : null;
+}
+function cmpV(a, b) { for (let i = 0; i < 3; i++) if (a[i] !== b[i]) return a[i] < b[i] ? -1 : 1; return 0; }
+function cleanV(v) { return String(v || '').replace(/^[\^~<>=!\s]+/, '').trim(); }
+function norm(eco, n) { n = String(n).trim().toLowerCase(); return eco === 'PyPI' ? n.replace(/[-_.]+/g, '-') : n; }
+function inRange(version, inc) {
+  if (/^\s*(>|<|!=|\*|latest)/i.test(String(version))) return null;
+  const v = parseV(cleanV(version));
+  if (!v) return null;
+  const lo = parseV(inc.introduced) || [0, 0, 0];
+  if (cmpV(v, lo) < 0) return false;
+  const hi = parseV(inc.fixed);
+  if (hi && cmpV(v, hi) >= 0) return false;
+  return true;
+}
+function rangeText(inc) {
+  const lo = parseV(inc.introduced), hasLo = lo && cmpV(lo, [0, 0, 0]) > 0;
+  const parts = [];
+  if (hasLo) parts.push('>= ' + inc.introduced);
+  parts.push(inc.fixed ? '< ' + inc.fixed : 'no fixed version yet');
+  return (hasLo ? '' : 'all versions ') + parts.join(', ');
+}
+function fixedFor(eco, f) { return eco === 'Go' && f && !f.startsWith('v') ? 'v' + f : f; }
+
+/* ---------- time ---------- */
+function fmtHours(h) { return h == null || h === Infinity ? 'no SLA' : h < 48 ? h + ' h' : Math.round(h / 24) + ' days'; }
+function fmtDue(ts) { return new Date(ts).toLocaleString([], {weekday:'short', hour:'2-digit', minute:'2-digit'}); }
+function dueText(run, h) { return h == null || h === Infinity ? 'no SLA' : `${fmtDue(run.firedAt + h * 3600e3)} (${fmtHours(h)})`; }
+
+/* ---------- environments, customers ---------- */
+const TIERS = {
+  Gold: {critical:4, high:24, medium:72, low:168},
+  Silver: {critical:8, high:48, medium:120, low:336},
+  Standard: {critical:24, high:72, medium:168, low:null}
+};
+const SEED_ENVS = () => [
+  {id:'dev', name:'dev', sla:{critical:72, high:168, medium:null, low:null}, ticket:false, slack:false, channel:'#team-dev', page:'never'},
+  {id:'staging', name:'staging', sla:{critical:24, high:72, medium:168, low:null}, ticket:true, slack:true, channel:'#releases', page:'never'},
+  {id:'prod', name:'prod', sla:{critical:4, high:24, medium:72, low:168}, ticket:true, slack:true, channel:'#sec-incidents', page:'high'}
+];
+const verIn = (d, envId) => (d.env && d.env[envId]) || d.version;
+function shouldPage(env, sev) {
+  if (env.page === 'never') return false;
+  if (env.page === 'critical') return sev === 'critical';
+  return sev === 'critical' || sev === 'high';
+}
+function envCustomers(p, envId) { return (p.envs && p.envs[envId] && p.envs[envId].customers) || []; }
+function effSla(p, envId, sev, envs, custs) {
+  let best = null;
+  envCustomers(p, envId).forEach(id => {
+    const c = custs.find(x => x.id === id);
+    if (c && c.sla[sev] != null && (!best || c.sla[sev] < best.hours)) best = {hours:c.sla[sev], by:c.name};
+  });
+  if (best) return best;
+  const e = envs.find(x => x.id === envId), h = e ? e.sla[sev] : null;
+  return {hours:h, by: h == null ? null : 'fallback'};
+}
+
+/* ---------- fake data pools ---------- */
+const POOL = {
+  npm: [
+    {n:'express', v:['4.17.1','4.18.2','4.19.2']},
+    {n:'qs', v:['6.7.0','6.11.0'], via:'express'},
+    {n:'body-parser', v:['1.19.0','1.20.1'], via:'express'},
+    {n:'lodash', v:['4.17.15','4.17.19','4.17.21']},
+    {n:'axios', v:['0.21.1','1.6.0','1.7.4']},
+    {n:'follow-redirects', v:['1.14.7','1.15.6'], via:'axios'},
+    {n:'jsonwebtoken', v:['8.5.1','9.0.2']},
+    {n:'semver', v:['7.3.5','7.5.4'], via:'jsonwebtoken'},
+    {n:'ws', v:['7.4.5','8.17.1']},
+    {n:'moment', v:['2.29.1','2.29.4']},
+    {n:'react', v:['18.2.0','18.3.1']},
+    {n:'next', v:['13.4.0','14.2.10']},
+    {n:'minimist', v:['1.2.5','1.2.8']}
+  ],
+  PyPI: [
+    {n:'django', v:['3.2.4','4.2.11','5.0.6']},
+    {n:'requests', v:['2.25.1','2.31.0','2.32.3']},
+    {n:'urllib3', v:['1.26.4','1.26.18','2.2.2'], via:'requests'},
+    {n:'certifi', v:['2021.5.30','2024.7.4'], via:'requests'},
+    {n:'flask', v:['2.0.1','3.0.3']},
+    {n:'jinja2', v:['3.0.1','3.1.4'], via:'flask'},
+    {n:'werkzeug', v:['2.0.1','3.0.3'], via:'flask'},
+    {n:'pyyaml', v:['5.3.1','6.0.1']},
+    {n:'pillow', v:['8.2.0','10.3.0']},
+    {n:'cryptography', v:['3.4.7','42.0.5']},
+    {n:'fastapi', v:['0.95.0','0.111.0']},
+    {n:'starlette', v:['0.26.1','0.37.2'], via:'fastapi'},
+    {n:'numpy', v:['1.21.0','1.26.4']}
+  ],
+  Go: [
+    {n:'github.com/gin-gonic/gin', v:['v1.7.2','v1.9.1']},
+    {n:'golang.org/x/net', v:['v0.7.0','v0.17.0','v0.23.0'], via:'github.com/gin-gonic/gin'},
+    {n:'gopkg.in/yaml.v3', v:['v3.0.0','v3.0.1'], via:'github.com/gin-gonic/gin'},
+    {n:'google.golang.org/grpc', v:['v1.56.2','v1.58.3']},
+    {n:'google.golang.org/protobuf', v:['v1.30.0','v1.33.0'], via:'google.golang.org/grpc'},
+    {n:'github.com/golang-jwt/jwt/v4', v:['v4.4.1','v4.5.0']},
+    {n:'golang.org/x/crypto', v:['v0.14.0','v0.21.0']},
+    {n:'github.com/redis/go-redis/v9', v:['v9.0.5','v9.5.1']}
+  ]
+};
+const NAME_A = ['billing','inventory','search','auth','notifications','reporting','catalog','shipping','pricing','loyalty'];
+const NAME_B = ['service','api','worker','web','gateway','jobs'];
+
+function fakeRepo(name, eco) {
+  const pool = POOL[eco];
+  const directs = pool.filter(p => !p.via).sort(() => Math.random() - .5).slice(0, 3 + Math.floor(Math.random() * 3));
+  const names = new Set(directs.map(d => d.n));
+  const chosen = [...directs, ...pool.filter(p => p.via && names.has(p.via) && Math.random() < .9)];
+  const deps = chosen.map(p => {
+    const i = Math.floor(Math.random() * p.v.length);
+    const d = {name:p.n, version:p.v[i], direct:!p.via, via:p.via || '', env:{}};
+    if (i > 0 && Math.random() < .45) {
+      const older = p.v[Math.floor(Math.random() * i)];
+      const last = S.envs[S.envs.length - 1];
+      if (last) d.env[last.id] = older;
+      if (S.envs.length > 2 && Math.random() < .5) d.env[S.envs[S.envs.length - 2].id] = older;
+    }
+    return d;
+  });
+  const deployed = {}, releases = {};
+  const major = 1 + Math.floor(Math.random() * 4), minor = Math.floor(Math.random() * 9);
+  S.envs.forEach((e, i) => {
+    deployed[e.id] = true;
+    releases[e.id] = i === 0 ? 'main@' + Math.random().toString(16).slice(2, 8) : `v${major}.${Math.max(0, minor - (S.envs.length - 1 - i))}.${Math.floor(Math.random() * 6)}`;
+  });
+  return {id:uid(), name, ecosystem:eco, watched:true, source:'fake', tests:pick(['good','some','none']), deps, deployed, releases};
+}
+
+const PRESETS = [
+  {label:'jsonwebtoken key confusion', id:'DEMO-2026-0104', severity:'critical', ecosystem:'npm', package:'jsonwebtoken', introduced:'0', fixed:'9.0.0',
+   summary:'jsonwebtoken accepts tokens signed with the wrong key type', details:'Insecure defaults allow an attacker to forge tokens by switching the algorithm.'},
+  {label:'lodash prototype pollution', id:'DEMO-2026-0101', severity:'high', ecosystem:'npm', package:'lodash', introduced:'0', fixed:'4.17.21',
+   summary:'Prototype pollution in lodash merge functions', details:'Crafted input to merge, mergeWith and defaultsDeep can add properties to Object.prototype.'},
+  {label:'urllib3 header leak', id:'DEMO-2026-0102', severity:'medium', ecosystem:'PyPI', package:'urllib3', introduced:'1.0.0', fixed:'1.26.18',
+   summary:'urllib3 keeps sensitive headers on cross-origin redirects', details:'Cookie headers are forwarded when following a redirect to a different host.'},
+  {label:'x/net HTTP/2 reset flood', id:'DEMO-2026-0103', severity:'high', ecosystem:'Go', package:'golang.org/x/net', introduced:'0', fixed:'0.17.0',
+   summary:'HTTP/2 rapid stream resets exhaust server resources', details:'A client can open and cancel streams quickly to cause denial of service.'},
+  {label:'No repo uses this', id:'DEMO-2026-0105', severity:'low', ecosystem:'npm', package:'left-pad', introduced:'0', fixed:'1.3.1',
+   summary:'left-pad mishandles very long padding strings', details:'Used to show a run where every repo comes back clear.'}
+];
+
+function seed() {
+  const envs = SEED_ENVS();
+  const C = (name, tier, contact, notify) => ({id:uid(), name, tier, sla:{...TIERS[tier]}, contact, notifyUnaffected:!!notify});
+  const customers = [
+    C('Contoso','Gold','security@contoso.example'), C('Fabrikam','Silver','it@fabrikam.example'),
+    C('Northwind','Standard','ops@northwind.example', true), C('Tailspin','Gold','cert@tailspin.example'),
+    C('Adatum','Standard','admin@adatum.example'), C('Litware','Silver','it@litware.example'),
+    C('Wingtip','Gold','soc@wingtip.example'), C('Woodgrove','Standard','ops@woodgrove.example', true)
+  ];
+  const cid = n => customers.find(x => x.name === n).id;
+  const all = {dev:true, staging:true, prod:true};
+  const R = (name, eco, tests, deployed, releases, deps, watched) => ({id:uid(), name, ecosystem:eco, watched: watched !== false, source:'fake', tests, deployed, releases,
+    deps: deps.map(([n, v, via, env]) => ({name:n, version:v, direct:!via, via:via || '', env:env || {}}))});
+  const P = (name, owner, ec, repos) => ({id:uid(), name, owner, repos,
+    envs: Object.fromEntries(envs.map(e => [e.id, {customers:(ec[e.id] || []).map(cid)}]))});
+  return {
+    envs, customers,
+    projects: [
+      P('Shop', 'Team Checkout', {staging:['Contoso'], prod:['Contoso','Fabrikam','Northwind']}, [
+        R('checkout-web', 'npm', 'good', all, {dev:'main@a1f9c2', staging:'v3.8.0', prod:'v3.7.2'}, [
+          ['express','4.18.2'],['qs','6.11.0','express'],['lodash','4.17.21','',{prod:'4.17.15'}],
+          ['axios','1.6.0','',{prod:'0.21.1', staging:'0.21.1'}],['follow-redirects','1.15.6','axios',{prod:'1.14.7', staging:'1.14.7'}],
+          ['jsonwebtoken','8.5.1'],['react','18.2.0']]),
+        R('checkout-api', 'npm', 'some', all, {dev:'main@5d21aa', staging:'v2.3.0', prod:'v2.2.4'}, [
+          ['express','4.19.2'],['jsonwebtoken','9.0.2','',{prod:'8.5.1'}],['semver','7.5.4','jsonwebtoken',{prod:'7.3.5'}],['ws','8.17.1']])
+      ]),
+      P('Payments', 'Team Payments', {staging:['Woodgrove'], prod:['Contoso','Tailspin']}, [
+        R('payments-api', 'PyPI', 'good', all, {dev:'main@7c03be', staging:'v2.14.1', prod:'v2.14.1'}, [
+          ['django','4.2.11','',{prod:'3.2.4', staging:'3.2.4'}],['requests','2.25.1'],['urllib3','1.26.4','requests'],
+          ['certifi','2021.5.30','requests'],['cryptography','42.0.5'],['pyyaml','6.0.1']]),
+        R('payments-worker', 'PyPI', 'some', all, {dev:'main@c18f07', staging:'v1.6.0', prod:'v1.5.2'}, [
+          ['celery','5.3.6'],['requests','2.31.0'],['urllib3','1.26.18','requests',{prod:'1.26.4'}],['pyyaml','5.3.1']])
+      ]),
+      P('Edge', 'Team Platform', {staging:['Fabrikam']}, [
+        R('edge-proxy', 'Go', 'good', {dev:true, staging:true, prod:false}, {dev:'main@e44d10', staging:'v0.9.0-rc2', prod:''}, [
+          ['github.com/gin-gonic/gin','v1.7.2'],['golang.org/x/net','v0.17.0','github.com/gin-gonic/gin',{staging:'v0.7.0'}],
+          ['gopkg.in/yaml.v3','v3.0.1','github.com/gin-gonic/gin'],['google.golang.org/grpc','v1.58.3'],['github.com/golang-jwt/jwt/v4','v4.5.0']])
+      ]),
+      P('Partner portal', 'Team Partners', {staging:['Adatum'], prod:['Adatum','Litware','Wingtip']}, [
+        R('partner-portal-web', 'npm', 'none', all, {dev:'main@91c0de', staging:'v1.12.0', prod:'v1.11.3'}, [
+          ['next','13.4.0'],['react','18.2.0'],['lodash','4.17.15'],['jsonwebtoken','8.5.1'],['moment','2.29.1']]),
+        R('partner-auth', 'npm', 'good', all, {dev:'main@3b77e2', staging:'v0.8.1', prod:'v0.8.0'}, [
+          ['express','4.18.2'],['express-jwt','7.7.5'],['jsonwebtoken','8.5.1','express-jwt'],['qs','6.11.0','express']])
+      ]),
+      P('Marketing', 'Team Web', {prod:['Northwind']}, [
+        R('marketing-site', 'npm', 'some', {dev:true, staging:false, prod:true}, {dev:'main@0b2e91', staging:'', prod:'v1.4.0'}, [
+          ['next','14.2.10'],['react','18.3.1'],['lodash','4.17.21'],['axios','1.7.4']], false)
+      ])
+    ],
+    runs: [],
+    draft: {...PRESETS[0]}
+  };
+}
+
+let S;
+try { S = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { S = null; }
+if (!S || !Array.isArray(S.projects) || !Array.isArray(S.customers)) S = seed();
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+const ui = { sel: {kind:'project', id:S.projects[0]?.id}, addMode:'fake', runSel:S.runs[0]?.id || null, open:{} };
+
+const allRepos = () => S.projects.flatMap(p => p.repos.map(r => ({r, p})));
+const findRepo = id => { for (const p of S.projects) { const r = p.repos.find(x => x.id === id); if (r) return {r, p}; } return null; };
+const findProj = id => S.projects.find(p => p.id === id);
+const custName = (run, id) => ((run ? run.custs : S.customers).find(c => c.id === id) || {name:'?'}).name;
+/* ---------- manifest parsing ---------- */
+function parseManifest(text) {
+  const t = text.trim();
+  if (!t) throw new Error('Paste the contents of a package.json, package-lock.json, requirements.txt or go.mod.');
+  if (t.startsWith('{')) {
+    let j;
+    try { j = JSON.parse(t); } catch (e) { throw new Error('That looks like JSON but doesn’t parse. Check for a missing comma or bracket.'); }
+    const directNames = new Set(Object.keys({...(j.dependencies || {}), ...(j.devDependencies || {})}));
+    if (j.packages && typeof j.packages === 'object') {
+      const rootDeps = j.packages[''] ? new Set(Object.keys({...(j.packages[''].dependencies || {}), ...(j.packages[''].devDependencies || {})})) : directNames;
+      const deps = [];
+      for (const [path, info] of Object.entries(j.packages)) {
+        if (!path || !info.version) continue;
+        const segs = path.split('node_modules/').filter(Boolean).map(s => s.replace(/\/$/, ''));
+        const name = segs[segs.length - 1];
+        const direct = segs.length === 1 && rootDeps.has(name);
+        deps.push({name, version:info.version, direct, via: direct ? '' : (segs.length > 1 ? segs[segs.length - 2] : 'lockfile')});
+      }
+      if (!deps.length) throw new Error('The lockfile has no packages in it.');
+      return {ecosystem:'npm', deps, guessName:j.name};
+    }
+    const all = {...(j.dependencies || {}), ...(j.devDependencies || {})};
+    const deps = Object.entries(all).map(([name, version]) => ({name, version:String(version), direct:true, via:''}));
+    if (!deps.length) throw new Error('This package.json has no dependencies or devDependencies.');
+    return {ecosystem:'npm', deps, guessName:j.name};
+  }
+  if (/^\s*module\s+\S+/m.test(t) || /^\s*require\s*[\(\s]/m.test(t)) {
+    const deps = [];
+    const mod = (t.match(/^\s*module\s+(\S+)/m) || [])[1];
+    t.split('\n').forEach(line => {
+      const m = line.match(/^\s*(?:require\s+)?([\w.\-~]+\.[\w.\-~\/]+)\s+(v[\w.\-+]+)(.*)$/);
+      if (m && m[1] !== 'module') {
+        const indirect = /\/\/\s*indirect/.test(m[3]);
+        deps.push({name:m[1], version:m[2], direct:!indirect, via: indirect ? 'indirect' : ''});
+      }
+    });
+    if (!deps.length) throw new Error('No require lines found in this go.mod.');
+    return {ecosystem:'Go', deps, guessName: mod ? mod.split('/').pop() : ''};
+  }
+  const deps = [];
+  t.split('\n').forEach(raw => {
+    const line = raw.replace(/#.*/, '').trim();
+    if (!line || line.startsWith('-')) return;
+    const m = line.match(/^([A-Za-z0-9_.\-]+)(?:\[[^\]]*\])?\s*(?:(===|==|>=|~=|<=|>|<|!=)\s*([\w.\-*+!]+))?/);
+    if (m) deps.push({name:m[1], version: m[3] ? (m[2] === '==' || m[2] === '===' ? m[3] : m[2] + m[3]) : 'unpinned', direct:true, via:''});
+  });
+  if (!deps.length) throw new Error('Couldn’t find any dependencies. Supported: package.json, package-lock.json, requirements.txt, go.mod.');
+  return {ecosystem:'PyPI', deps, guessName:''};
+}
+
+/* ---------- matching (step 2) ---------- */
+function depPath(d) { return d.direct ? 'direct' : 'via ' + d.via; }
+const RANK = {affected:0, unknown:1, patched:2, clear:3, none:4};
+const VERDICT_LABEL = {affected:'Affected', unknown:'Check manually', patched:'Not affected', clear:'Clear', none:'Not deployed'};
+function judge(hits, inc, getV) {
+  const ms = hits.map(d => { const v = getV(d); const r = inRange(v, inc); return {name:d.name, direct:d.direct, via:d.via, version:v, state: r === null ? 'unknown' : r ? 'affected' : 'patched'}; });
+  ms.sort((a, b) => RANK[a.state] - RANK[b.state]);
+  return {state: ms[0].state, dep: ms[0]};
+}
+function evaluate(repo, p, inc, envs, custs) {
+  const base = {repoId:repo.id, repoName:repo.name, projectId:p.id, projectName:p.name, owner:p.owner, tests:repo.tests || 'some'};
+  if (repo.ecosystem !== inc.ecosystem) return {...base, verdict:'clear', note:`Different ecosystem (${repo.ecosystem})`, main:null, envs:[]};
+  const target = norm(inc.ecosystem, inc.package);
+  const hits = repo.deps.filter(d => norm(repo.ecosystem, d.name) === target);
+  if (!hits.length) return {...base, verdict:'clear', note:`No dependency on ${inc.package}`, main:null, envs:[]};
+  const main = judge(hits, inc, d => d.version);
+  const envRes = envs.map(e => {
+    const deployed = repo.deployed && repo.deployed[e.id];
+    const sla = effSla(p, e.id, inc.severity, envs, custs);
+    return deployed
+      ? {env:e.id, name:e.name, release:(repo.releases || {})[e.id] || '', customers:envCustomers(p, e.id), slaHours:sla.hours, slaBy:sla.by, ...judge(hits, inc, d => verIn(d, e.id))}
+      : {env:e.id, name:e.name, release:'', customers:[], state:'none', dep:null};
+  });
+  const verdict = [main.state, ...envRes.map(x => x.state)].sort((a, b) => RANK[a] - RANK[b])[0];
+  const hit = envRes.filter(x => x.state === 'affected'), hitNames = hit.map(x => x.name);
+  let note, fix = null;
+  if (hit.length && main.state !== 'affected') {
+    const d = hit[hit.length - 1].dep;
+    note = `${listText(hitNames)} still run${hitNames.length === 1 ? 's' : ''} ${d.name}@${d.version}. Main already has ${main.dep.version}, so this needs a deploy, not a code change.`;
+    fix = 'deploy';
+  } else if (hit.length) {
+    note = `${main.dep.name}@${main.dep.version} (${depPath(main.dep)}) is affected on main and in ${listText(hitNames)}.`;
+    fix = 'code';
+  } else if (main.state === 'affected') {
+    note = `Main uses ${main.dep.name}@${main.dep.version}, which is affected, but no deployed environment runs it yet.`;
+    fix = 'code';
+  } else if (verdict === 'unknown') {
+    note = `${main.dep.name} has an unpinned version (“${(envRes.find(x => x.state === 'unknown') || main).dep.version}”). Check the lockfile or the deployed artifact.`;
+  } else {
+    note = `Uses ${main.dep.name}, but main and every deployed environment are outside the affected range.`;
+  }
+  let sla = null;
+  hit.forEach(x => { if (x.slaHours != null && (!sla || x.slaHours <= sla.hours)) sla = {env:x.name, hours:x.slaHours, by:x.slaBy}; });
+  return {...base, verdict, note, fix, main, envs:envRes, sla};
+}
+const custCount = r => uniq(r.envs.filter(x => x.state === 'affected').flatMap(x => x.customers)).length;
+const repoDue = r => r.sla ? r.sla.hours : Infinity;
+
+/* ---------- grouping (step 4, simulated LLM) ---------- */
+function groupOf(r, inc) {
+  const pkg = inc.package;
+  if (!inc.fixed) return {key:'nofix', strategy:'nofix', label:`No fix for ${pkg} yet`};
+  if (r.fix === 'deploy') return {key:'deploy', strategy:'deploy', label:`Deploy only: main already safe`};
+  const d = r.main.dep, major = (parseV(cleanV(d.version)) || [0])[0];
+  if (d.direct) return {key:'direct|' + major, strategy:'bump', label:`Direct ${pkg} ${major}.x`, major, cur:cleanV(d.version)};
+  return {key:'via|' + d.via, strategy:'override', label:`${pkg} via ${d.via}`, via:d.via, cur:cleanV(d.version)};
+}
+function makeGroups(affected, inc, eco) {
+  const map = {};
+  affected.forEach(r => { const g = groupOf(r, inc); (map[g.key] = map[g.key] || {...g, members:[]}).members.push(r.repoId); });
+  return Object.values(map).map((g, i) => {
+    const names = g.members.map(id => affected.find(r => r.repoId === id).repoName);
+    const rationale = {
+      deploy: `Main already has a safe ${inc.package} in ${listText(names)}; only older releases are affected, so promoting a newer release fixes it.`,
+      bump: `${inc.package} is a direct dependency on ${g.major}.x in ${listText(names)}; the same manifest change applies to each.`,
+      override: `${inc.package} only arrives through ${g.via} in ${listText(names)}; the fix is the same override or ${g.via} upgrade everywhere.`,
+      nofix: `No fixed version is published, so every repo needs a mitigation by hand.`
+    }[g.strategy];
+    const confidence = {deploy:.93, bump:.88, override:.81, nofix:.95}[g.strategy];
+    return {...g, id:'g' + (i + 1), rationale, confidence, recipe:makeRecipe(g, inc, eco), pilot:null, pilotDone:false, revisions:0};
+  });
+}
+
+/* ---------- recipes (step 5) ---------- */
+function makeRecipe(g, inc, eco) {
+  const pkg = inc.package, fx = fixedFor(eco, inc.fixed);
+  let complexity = 'M', breaking = '', steps = [];
+  if (g.strategy === 'deploy') {
+    complexity = 'S';
+    steps = ['Find the newest release that contains main’s safe version', 'Prepare a deploy request for each affected environment', 'After the deploy, re-scan the deployed release'];
+    breaking = 'No code change: the release already runs in an earlier environment.';
+  } else if (g.strategy === 'nofix') {
+    complexity = 'L';
+    steps = ['Check the advisory for mitigations', 'Disable or guard the affected feature', 'Watch for a fixed release'];
+    breaking = 'Mitigation depends on how each project uses the package.';
+  } else {
+    const cur = parseV(g.cur) || [0, 0, 0], to = parseV(inc.fixed) || [0, 0, 0];
+    complexity = g.strategy === 'override' ? 'M' : to[0] > cur[0] ? 'L' : to[1] > cur[1] ? 'M' : 'S';
+    if (eco === 'npm') steps = g.strategy === 'bump'
+      ? [`Set "${pkg}": "^${fx}" in package.json`, 'Run npm install to refresh package-lock.json']
+      : [`Add "overrides": { "${pkg}": "${fx}" } to package.json`, 'Run npm install to refresh package-lock.json', `Check that ${g.via} still works with ${pkg} ${fx}`];
+    else if (eco === 'PyPI') steps = g.strategy === 'bump'
+      ? [`Set ${pkg}==${fx} in requirements.txt`, 'Reinstall into a clean virtualenv']
+      : [`Pin ${pkg}>=${fx} in requirements.txt`, `Check that ${g.via} accepts the pinned version`];
+    else steps = [`go get ${pkg}@${fx}`, 'go mod tidy'];
+    steps.push('Build and run the test suite', 'Re-scan: dependency outside the affected range', 'Open a PR with the recipe and test results');
+    breaking = complexity === 'L'
+      ? (pkg === 'jsonwebtoken' ? 'jsonwebtoken 9 removes insecure defaults: verify() calls need an explicit algorithms list.' : `Major update from ${g.cur} to ${fx}: check the changelog for removed defaults and changed signatures.`)
+      : g.strategy === 'override' ? `Overriding a transitive version can break ${g.via} if it relies on old behaviour.` : 'Patch or minor update; no breaking changes expected.';
+  }
+  return {strategy:{deploy:'Deploy only', nofix:'No fix available', bump:'Version bump', override:'Override or pin'}[g.strategy],
+    complexity, steps, breaking, verify: g.strategy === 'deploy' ? ['The deployed release is re-scanned as safe in every affected environment'] : ['Build passes', 'Tests pass', 'Re-scan shows the dependency outside the affected range'],
+    confidence:g.strategy === 'deploy' ? 'Validated' : 'Draft', version:1, learnings:[]};
+}
+
+/* ---------- pilots and priority (step 6) ---------- */
+const SAFETY = {good:0, some:1, none:2};
+const TESTS_LABEL = {good:'good', some:'partial', none:'no'};
+function choosePilot(g, run) {
+  if (g.strategy === 'deploy' || g.strategy === 'nofix') return null;
+  const ms = g.members.map(id => run.results.find(r => r.repoId === id));
+  const exp = {S:1, M:2, L:4}[g.recipe.complexity];
+  const tight = Math.min(...ms.map(repoDue));
+  if (tight < 2 * exp) {
+    const b = [...ms].sort((a, c) => ncmp(repoDue(a), repoDue(c)) || SAFETY[a.tests] - SAFETY[c.tests])[0];
+    return {id:b.repoId, review:true, reason:`The ${fmtHours(tight)} deadline leaves less than twice the expected fix time of ${exp} h, so the most urgent repo is the pilot and its PR needs human review.`};
+  }
+  const b = [...ms].sort((a, c) => SAFETY[a.tests] - SAFETY[c.tests] || custCount(a) - custCount(c) || ncmp(repoDue(c), repoDue(a)))[0];
+  return {id:b.repoId, review:false, reason:`Safest representative repo: ${TESTS_LABEL[b.tests]} tests, ${custCount(b)} customer${custCount(b) === 1 ? '' : 's'} affected.`};
+}
+function roleOf(g, r) {
+  if (g.strategy === 'deploy') return 'Deploy';
+  if (g.strategy === 'nofix') return 'Manual';
+  if (g.pilot && g.pilot.id === r.repoId) return 'Pilot';
+  return g.pilotDone ? 'Rollout' : 'Waits for pilot';
+}
+function priority(run) {
+  const R = id => run.results.find(r => r.repoId === id);
+  const groups = run.groups.map(g => ({g, ms:g.members.map(R)}));
+  groups.sort((a, b) => ncmp(Math.min(...a.ms.map(repoDue)), Math.min(...b.ms.map(repoDue)))
+    || b.ms.reduce((n, r) => n + custCount(r), 0) - a.ms.reduce((n, r) => n + custCount(r), 0));
+  const rows = [];
+  groups.forEach(({g, ms}) => {
+    ms.sort((a, b) => (g.pilot && a.repoId === g.pilot.id ? -1 : g.pilot && b.repoId === g.pilot.id ? 1 : 0)
+      || ncmp(repoDue(a), repoDue(b)) || custCount(b) - custCount(a));
+    ms.forEach(r => rows.push({r, g, role:roleOf(g, r), st:run.repoState[r.repoId]}));
+  });
+  return rows;
+}
+const FINAL = ['verified', 'escalated'];
+const eligible = row => row.st.status === 'queued' && row.role !== 'Waits for pilot';
+
+/* ---------- run creation ---------- */
+const ADVISORY = {
+  subject:'Security advisory {incident}: {project}',
+  body:'Hello {customer},\n\nWe are tracking a security issue ({incident}, {severity}) in a software component used by {project}. This affects your {environment}.\n\nWe will have it fixed by {deadline} at the latest and will confirm once the fix is live.\n\nNo action is needed from you right now.\n\nYour operations team'
+};
+const RESOLUTION = {
+  subject:'Resolved: security advisory {incident}',
+  body:'Hello {customer},\n\nThe security issue {incident} is fixed in {project}. The fix is live on your {environment}.\n\nNo action is needed from you.\n\nYour operations team'
+};
+const UNAFFECTED = {
+  subject:'Security advisory {incident}: not affected',
+  body:'Hello {customer},\n\nWe checked your systems against security issue {incident}. None of your environments is affected, and no action is needed.\n\nYour operations team'
+};
+function buildRun(inc) {
+  const envs = clone(S.envs), custs = clone(S.customers);
+  const results = [];
+  S.projects.forEach(p => p.repos.filter(r => r.watched).forEach(r => results.push(evaluate(r, p, inc, envs, custs))));
+  const affected = results.filter(r => r.verdict === 'affected');
+  const rec = {};
+  affected.forEach(r => r.envs.filter(x => x.state === 'affected').forEach(x => x.customers.forEach(id => {
+    const c = rec[id] = rec[id] || {id, items:{}};
+    const k = r.projectName + '|' + x.name;
+    if (!c.items[k] || dnum(x.slaHours) < dnum(c.items[k].hours)) c.items[k] = {project:r.projectName, projectId:r.projectId, env:x.name, hours:x.slaHours};
+  })));
+  const recipients = Object.values(rec).map(c => { const items = Object.values(c.items); return {id:c.id, items, due:Math.min(...items.map(i => dnum(i.hours)))}; })
+    .sort((a, b) => ncmp(a.due, b.due));
+  const watchedCust = new Set(S.projects.filter(p => p.repos.some(r => r.watched)).flatMap(p => Object.values(p.envs).flatMap(e => e.customers)));
+  const unaffected = custs.filter(c => c.notifyUnaffected && !rec[c.id] && watchedCust.has(c.id)).map(c => c.id);
+  const run = {id:'run_' + uid(), firedAt:Date.now(), incident:inc, envs, custs, results, recipients, unaffected,
+    notify:{status: recipients.length || unaffected.length ? 'pending' : 'none', ...ADVISORY, approvedAt:null},
+    resolution:{...RESOLUTION, sent:[]}, outbox:[], groups:[], repoState:{}, prSeq:100 + Math.floor(Math.random() * 300)};
+  run.groups = makeGroups(affected, inc, inc.ecosystem);
+  run.groups.forEach(g => { g.pilot = choosePilot(g, run); });
+  affected.forEach(r => { run.repoState[r.repoId] = {status:'queued', attempts:0, log:[]}; });
+  return run;
+}
+
+/* ---------- fixing (step 7) and escalation (step 8), simulated ---------- */
+function learn(g, r, kind, inc) {
+  const rec = g.recipe, pkg = inc.package, eco = inc.ecosystem;
+  let text;
+  if (kind === 'pilot') {
+    text = rec.complexity === 'L'
+      ? `Pilot on ${r.repoName}: the major update needed 2 small edits at the ${pkg} call sites. Added as a recipe step.`
+      : eco === 'npm' ? `Pilot on ${r.repoName}: run npm dedupe after the change, otherwise an old ${pkg} copy stays in the lockfile.`
+      : eco === 'PyPI' ? `Pilot on ${r.repoName}: pin ${pkg} in the constraints file too, or pip resolves the old version again.`
+      : `Pilot on ${r.repoName}: run go mod tidy after go get, or go.sum keeps the old checksum and CI fails.`;
+    if (rec.complexity === 'L') rec.steps.splice(rec.steps.length - 3, 0, `Update ${pkg} call sites flagged by the changelog`);
+    else if (eco === 'npm') rec.steps.splice(2, 0, 'Run npm dedupe');
+  } else if (kind === 'partial') {
+    text = `${r.repoName}: with partial tests, also run the smoke suite; unit tests missed the ${pkg} call sites.`;
+    if (rec.learnings.some(l => l.kind === 'partial')) return;
+    rec.steps.splice(rec.steps.length - 2, 0, 'Run the smoke suite as well');
+  } else {
+    text = `Pilot on ${r.repoName} failed without tests. Revised recipe adds a smoke test before the change.`;
+    rec.steps.unshift('Add a smoke test that covers the affected code');
+  }
+  rec.version += 1;
+  rec.learnings.push({v:rec.version, kind, text});
+}
+function runOne(run, row) {
+  const {r, g} = row, st = run.repoState[r.repoId], rec = g.recipe, inc = run.incident;
+  const add = t => st.log.push(t);
+  st.recipeVersion = rec.version;
+  const hitEnvs = r.envs.filter(x => x.state === 'affected').map(x => x.name);
+  if (g.strategy === 'nofix') {
+    st.status = 'escalated'; st.reason = `No fixed version of ${inc.package} is published.`;
+    add('Escalated: no fixed version to upgrade to.'); return;
+  }
+  if (g.strategy === 'deploy') {
+    const safe = r.envs.filter(x => x.state === 'patched');
+    st.status = 'deploy-ready'; st.attempts = 1;
+    add(`Deploy request prepared: promote ${safe.length ? (safe[safe.length - 1].release || 'the latest safe release') : 'main'} to ${listText(hitEnvs)}.`);
+    return;
+  }
+  const ok = r.tests !== 'none' || rec.complexity === 'S';
+  if (ok) {
+    st.attempts = 1; st.status = 'pr'; st.pr = ++run.prSeq;
+    add(`Attempt 1 with recipe v${rec.version}: applied in sandbox, build passed, ${r.tests === 'good' ? 'all tests passed' : r.tests === 'some' ? 'tests passed (partial coverage)' : 'no tests, patch-level change'}, re-scan clean.`);
+    add(`Opened PR #${st.pr}${row.role === 'Pilot' && g.pilot.review ? ', human review required' : ''}.`);
+    if (row.role === 'Pilot') { g.pilotDone = true; rec.confidence = 'Validated'; learn(g, r, 'pilot', inc); st.recipeVersion = rec.version; add(`Recipe validated and updated to v${rec.version}.`); }
+    else if (r.tests === 'some') { const v = rec.version; learn(g, r, 'partial', inc); if (rec.version > v) add(`Recipe updated to v${rec.version}.`); }
+    return;
+  }
+  st.attempts = 3;
+  add(`Attempt 1 with recipe v${rec.version}: build passed, but no tests cover the change.`);
+  add('Attempt 2: added a smoke check; it fails on the changed API.');
+  add('Attempt 3: stopped at the 30-minute limit.');
+  if (row.role === 'Pilot') {
+    if (g.revisions === 0) { g.revisions = 1; learn(g, r, 'revise', inc); st.attempts = 0; add(`Pilot failed: back to step 5, recipe revised to v${rec.version}. The pilot runs again.`); return; }
+    g.members.forEach(id => { const s = run.repoState[id]; if (!FINAL.includes(s.status)) { s.status = 'escalated'; s.reason = 'The group’s pilot failed twice, so the recipe could not be validated.'; } });
+    return;
+  }
+  st.status = 'escalated';
+  st.reason = 'Attempt limit reached: no tests cover the changed code.';
+}
+function verify(run, id) {
+  const r = run.results.find(x => x.repoId === id), st = run.repoState[id];
+  st.status = 'verified';
+  st.log.push(`Deployed to ${listText(r.envs.filter(x => x.state === 'affected').map(x => x.name))}; re-scan of the deployed releases is clean.`);
+}
+
+/* ---------- texts ---------- */
+const fill = (t, v) => t.replace(/\{(\w+)\}/g, (m, k) => v[k] ?? m);
+function recipientVars(run, rc) {
+  return {customer:custName(run, rc.id), incident:run.incident.id, severity:run.incident.severity,
+    project:listText(uniq(rc.items.map(i => i.project))), environment:(e => listText(e) + (e.length > 1 ? ' environments' : ' environment'))(uniq(rc.items.map(i => i.env))),
+    deadline: rc.due === Infinity ? 'as soon as possible' : fmtDue(run.firedAt + rc.due * 3600e3)};
+}
+function resolvable(run) {
+  const done = pid => run.results.filter(r => r.projectId === pid && r.verdict === 'affected').every(r => run.repoState[r.repoId].status === 'verified');
+  return run.recipients.filter(rc => !run.resolution.sent.includes(rc.id) && rc.items.every(i => done(i.projectId)));
+}
+function prText(run, r, g) {
+  const inc = run.incident, st = run.repoState[r.repoId], rec = g.recipe;
+  if (st.status === 'deploy-ready' || g.strategy === 'deploy') {
+    const hit = r.envs.filter(x => x.state === 'affected'), safe = r.envs.filter(x => x.state === 'patched');
+    return `Deploy request for ${r.repoName} (${inc.id})\n\nMain already has ${r.main.dep.name}@${r.main.dep.version}.\n${safe.length ? `Already safe: ${safe.map(x => x.name + (x.release ? ' (' + x.release + ')' : '')).join(', ')}\n` : ''}\n${hit.map((x, i) => `${i + 1}. Promote ${safe.length ? safe[safe.length - 1].release || 'the latest safe release' : 'main'} to ${x.name} (now ${x.release || 'unknown'}), fix by ${dueText(run, x.slaHours)}`).join('\n')}\n${hit.length + 1}. Re-scan the deployed release.`;
+  }
+  const d = r.main.dep, fx = fixedFor(inc.ecosystem, inc.fixed);
+  return `PR #${st.pr}: Bump ${d.name} to ${fx} (${inc.id})\nBranch: bloodhound/${inc.id.toLowerCase()}\n\nRecipe: ${g.label}, v${st.recipeVersion}\n${rec.steps.map((s, i) => `${i + 1}. ${s}`).join('\n')}\n\nBreaking changes: ${rec.breaking}\nTests: ${TESTS_LABEL[r.tests]} coverage\n\nAfter merge, roll out to: ${r.envs.filter(x => x.state === 'affected').map(x => `${x.name}, fix by ${dueText(run, x.slaHours)}`).join('; ') || 'next normal release'}`;
+}
+function ticketText(run, r, g) {
+  const inc = run.incident, st = run.repoState[r.repoId];
+  return `Title: [ESCALATED] ${inc.package} in ${r.repoName} (${inc.id}, ${inc.severity})
+Project: ${r.projectName}, owner ${r.owner}
+Reason: ${st.reason}
+Deadline: ${dueText(run, repoDue(r))}${r.sla ? ' in ' + r.sla.env : ''}
+Recipe: ${g ? g.label + ', v' + (st.recipeVersion || g.recipe.version) : 'none'}
+
+Attempts:
+${st.log.map(l => '- ' + l).join('\n') || '- none'}
+
+Manual steps:
+${(g ? g.recipe.steps : []).map(s => '- [ ] ' + s).join('\n')}${r.tests === 'none' ? '\n- [ ] Add tests that cover the ' + inc.package + ' call sites' : ''}
+- [ ] Re-run Bloodhound for ${inc.id} to verify`;
+}
+
+/* ---------- payload ---------- */
+function payload(inc) {
+  const events = [{introduced: inc.introduced || '0'}];
+  if (inc.fixed) events.push({fixed: inc.fixed});
+  return {
+    id: inc.id, summary: inc.summary, details: inc.details,
+    published: new Date().toISOString().slice(0, 19) + 'Z',
+    database_specific: {severity: inc.severity.toUpperCase()},
+    affected: [{package: {ecosystem: inc.ecosystem, name: inc.package}, ranges: [{type: 'ECOSYSTEM', events}]}]
+  };
+}
+/* ---------- chrome ---------- */
+function renderChrome() {
+  const repos = allRepos(), w = repos.filter(x => x.r.watched).length;
+  $('#status-text').textContent = `Hook listening. Watching ${w} of ${repos.length} repos in ${S.projects.length} projects for ${S.customers.length} customers.`;
+  $('#run-count').textContent = S.runs.length;
+}
+const VIEWS = ['projects', 'customers', 'environments', 'lab', 'runs'];
+function currentView() { const h = location.hash.slice(1); return VIEWS.includes(h) ? h : 'projects'; }
+function setView(v) {
+  document.querySelectorAll('.view').forEach(s => s.classList.toggle('on', s.id === 'v-' + v));
+  document.querySelectorAll('nav a').forEach(a => { if (a.dataset.view === v) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+}
+function show() {
+  const v = currentView();
+  setView(v);
+  ({projects:renderProjects, customers:renderCustomers, environments:renderEnvs, lab:renderLab, runs:renderRuns})[v]();
+  renderChrome();
+}
+
+/* ---------- projects ---------- */
+function renderProjects() {
+  const sel = ui.sel;
+  $('#proj-list').innerHTML = S.projects.map(p => `<li>
+    <button class="proj-item" data-act="sel-proj" data-id="${p.id}" aria-current="${sel.id === p.id && sel.kind !== 'repo'}">
+      <span class="nm">${esc(p.name)}</span><span class="meta">${esc(p.owner)}, ${p.repos.length} repo${p.repos.length === 1 ? '' : 's'}</span></button>
+    <ul class="sub">${p.repos.map(r => `<li><div class="repo-item" role="button" tabindex="0" data-act="sel-repo" data-id="${r.id}" aria-current="${sel.kind === 'repo' && sel.id === r.id}">
+      <div class="grow"><span class="nm">${esc(r.name)}</span><span class="meta"><span class="eco">${esc(r.ecosystem)}</span> ${TESTS_LABEL[r.tests || 'some']} tests</span></div>
+      <label class="switch"><input type="checkbox" data-act="watch" data-id="${r.id}" ${r.watched ? 'checked' : ''} aria-label="Watch ${esc(r.name)}">Watch</label>
+    </div></li>`).join('')}</ul></li>`).join('') || '<li class="empty small">No projects yet.</li>';
+  const panel = $('#proj-panel');
+  if (sel.kind === 'add-project') return renderAddProject(panel);
+  if (sel.kind === 'add-repo') return renderAddRepo(panel, findProj(sel.id));
+  if (sel.kind === 'repo') { const f = findRepo(sel.id); if (f) return renderRepoDetail(panel, f.r, f.p); }
+  const p = findProj(sel.id) || S.projects[0];
+  if (!p) return renderAddProject(panel);
+  ui.sel = {kind:'project', id:p.id};
+  renderProjectDetail(panel, p);
+}
+function renderProjectDetail(panel, p) {
+  const sev = S.draft.severity;
+  panel.innerHTML = `
+    <div class="grid2">
+      <label class="f"><span>Project</span><input data-proj="${p.id}" data-pk="name" value="${esc(p.name)}"></label>
+      <label class="f"><span>Owner</span><input data-proj="${p.id}" data-pk="owner" value="${esc(p.owner)}"></label>
+    </div>
+    <h3>Environments and customers</h3>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Environment</th><th>Customers</th>${SEVS.map(s => `<th><span class="sev ${s}">${s}</span></th>`).join('')}</tr></thead>
+      <tbody>${S.envs.map(e => {
+        const ids = envCustomers(p, e.id), others = S.customers.filter(c => !ids.includes(c.id));
+        return `<tr><td><strong>${esc(e.name)}</strong></td>
+          <td style="white-space:normal;min-width:220px">${ids.map(id => { const c = S.customers.find(x => x.id === id); return c ? `<span class="cchip">${esc(c.name)} <span class="tier">${esc(c.tier)}</span><button data-act="rm-cust" data-key="${p.id}|${e.id}|${id}" aria-label="Remove ${esc(c.name)}">×</button></span>` : ''; }).join('')}
+            ${others.length ? `<select class="add" data-addcust="${p.id}|${e.id}" aria-label="Add a customer to ${esc(e.name)}"><option value="">Add customer…</option>${others.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select>` : ''}</td>
+          ${SEVS.map(s => { const x = effSla(p, e.id, s, S.envs, S.customers); return `<td class="slac">${fmtHours(x.hours)}<small>${x.by === 'fallback' ? 'fallback' : x.by ? 'from ' + esc(x.by) : ''}</small></td>`; }).join('')}</tr>`;
+      }).join('')}</tbody></table></div>
+    <p class="note">Each deadline is the strictest SLA among the customers on that environment. With no customers, the environment’s fallback applies.</p>
+    <h3>Repos</h3>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Repo</th><th>Ecosystem</th><th>Tests</th><th>Deployed to</th><th>Watched</th></tr></thead>
+      <tbody>${p.repos.map(r => `<tr><td><button class="btn sm" data-act="sel-repo" data-id="${r.id}">${esc(r.name)}</button></td><td>${esc(r.ecosystem)}</td><td>${TESTS_LABEL[r.tests || 'some']}</td>
+        <td>${esc(S.envs.filter(e => r.deployed && r.deployed[e.id]).map(e => e.name).join(', ') || 'nowhere')}</td><td>${r.watched ? 'Yes' : 'No'}</td></tr>`).join('') || '<tr><td colspan="5" class="muted">No repos yet.</td></tr>'}</tbody>
+    </table></div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn primary" data-act="add-repo" data-id="${p.id}">Add a repo</button>
+      <button class="btn danger" data-act="remove-project" data-id="${p.id}">Remove project</button>
+    </div>`;
+}
+function renderAddProject(panel) {
+  panel.innerHTML = `<h2>Add a project</h2>
+    <label class="f"><span>Project name</span><input id="np-name" placeholder="e.g. Customer portal"></label>
+    <label class="f"><span>Owning team</span><input id="np-owner" placeholder="e.g. Team Portal"></label>
+    <button class="btn primary" data-act="create-project">Create project</button>`;
+}
+function renderRepoDetail(panel, r, p) {
+  r.deployed = r.deployed || {}; r.releases = r.releases || {};
+  const drift = S.envs.reduce((n, e) => n + r.deps.filter(d => r.deployed[e.id] && verIn(d, e.id) !== d.version).length, 0);
+  panel.innerHTML = `
+    <p class="small" style="margin:0 0 6px"><button class="btn sm" data-act="sel-proj" data-id="${p.id}">Back to ${esc(p.name)}</button></p>
+    <div class="row" style="justify-content:space-between;margin-bottom:6px">
+      <h2 style="margin:0;font-size:22px">${esc(r.name)}</h2>
+      <label class="switch"><input type="checkbox" data-act="watch" data-id="${r.id}" ${r.watched ? 'checked' : ''}>${r.watched ? 'Watched' : 'Not watched'}</label>
+    </div>
+    <div class="row small muted" style="margin:0 0 14px"><span class="eco">${esc(r.ecosystem)}</span>
+      <span>${r.deps.filter(d => d.direct).length} direct and ${r.deps.filter(d => !d.direct).length} transitive dependencies.</span>
+      <label>Test coverage <select class="inl" data-tests="${r.id}">${['good','some','none'].map(t => `<option value="${t}" ${r.tests === t ? 'selected' : ''}>${TESTS_LABEL[t]}</option>`).join('')}</select></label></div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Package</th><th>How it’s used</th><th class="envh">main</th>
+        ${S.envs.map(e => `<th class="envh">${esc(e.name)}
+          <input class="release" data-rel="${r.id}|${e.id}" value="${esc(r.releases[e.id] || '')}" placeholder="release" aria-label="${esc(e.name)} release">
+          <label class="switch"><input type="checkbox" data-deploy="${r.id}|${e.id}" ${r.deployed[e.id] ? 'checked' : ''}>Deployed</label></th>`).join('')}
+      </tr></thead>
+      <tbody>${r.deps.map((d, i) => `<tr><td class="mono">${esc(d.name)}</td>
+        <td>${d.direct ? 'Direct' : 'Via <span class="mono">' + esc(d.via) + '</span>'}</td>
+        <td><input class="cell" data-cell="${r.id}|${i}|main" value="${esc(d.version)}" aria-label="${esc(d.name)} on main"></td>
+        ${S.envs.map(e => `<td class="${!r.deployed[e.id] ? 'off' : verIn(d, e.id) !== d.version ? 'drift' : ''}"><input class="cell" data-cell="${r.id}|${i}|${e.id}" value="${esc(verIn(d, e.id))}" aria-label="${esc(d.name)} in ${esc(e.name)}"></td>`).join('')}
+      </tr>`).join('')}</tbody>
+    </table></div>
+    <p class="note">${drift ? `${drift} version${drift === 1 ? '' : 's'} in deployed environments differ from main (orange).` : 'Every deployed environment matches main.'} Edit a cell to set what an environment really runs; clear it to follow main again. Test coverage decides which repo is the safest pilot.</p>
+    <div class="row" style="margin-top:12px">
+      ${r.source === 'fake' ? `<button class="btn" data-act="reroll" data-id="${r.id}">Regenerate versions</button>` : ''}
+      <button class="btn danger" data-act="remove-repo" data-id="${r.id}">Remove repo</button>
+    </div>`;
+}
+function renderAddRepo(panel, p) {
+  if (!p) return renderProjects();
+  panel.innerHTML = `
+    <p class="small" style="margin:0 0 6px"><button class="btn sm" data-act="sel-proj" data-id="${p.id}">Back to ${esc(p.name)}</button></p>
+    <h2>Add a repo to ${esc(p.name)}</h2>
+    <div class="seg" role="group" aria-label="How to add">
+      <button data-act="mode" data-mode="fake" aria-pressed="${ui.addMode === 'fake'}">Generate a fake repo</button>
+      <button data-act="mode" data-mode="manifest" aria-pressed="${ui.addMode === 'manifest'}">Paste a manifest</button>
+    </div>
+    ${ui.addMode === 'fake' ? `
+      <div class="grid2">
+        <label class="f"><span>Ecosystem</span><select id="fk-eco">${ECOS.map(e => `<option>${e}</option>`).join('')}</select></label>
+        <label class="f"><span>Repo name (optional)</span><input id="fk-name" placeholder="Random if empty"></label>
+      </div>
+      <p class="note" style="margin-top:0">Picks real package names with a mix of vulnerable and patched versions. Later environments sometimes lag behind main.</p>
+      <button class="btn primary" data-act="gen" data-id="${p.id}">Generate repo</button>
+    ` : `
+      <label class="f"><span>Repo name</span><input id="mf-name" placeholder="e.g. orders-service"></label>
+      <label class="f"><span>package.json, package-lock.json, requirements.txt or go.mod</span><textarea id="mf-text" spellcheck="false" placeholder='{ "name": "orders-service", "dependencies": { "lodash": "^4.17.15" } }'></textarea></label>
+      <p class="note" style="margin-top:0">Every environment starts on the same versions as main. You can change them after the repo is added.</p>
+      <button class="btn primary" data-act="parse" data-id="${p.id}">Retrieve dependencies</button>
+      <div class="err" id="mf-err" role="alert"></div>
+    `}`;
+}
+
+/* ---------- customers ---------- */
+function renderCustomers() {
+  const usedOn = c => S.projects.flatMap(p => S.envs.filter(e => envCustomers(p, e.id).includes(c.id)).map(e => `${p.name} ${e.name}`));
+  $('#cust-table').innerHTML = `<div class="tbl-wrap"><table>
+    <thead><tr><th>Customer</th><th>Tier</th>${SEVS.map(s => `<th><span class="sev ${s}">${s}</span> h</th>`).join('')}<th>Contact</th><th>“Not affected” notice</th><th>Uses</th><th></th></tr></thead>
+    <tbody>${S.customers.map(c => `<tr>
+      <td><input class="inl" data-cust="${c.id}" data-ck="name" value="${esc(c.name)}" aria-label="Customer name"></td>
+      <td><select class="inl" data-cust="${c.id}" data-ck="tier">${Object.keys(TIERS).map(t => `<option ${t === c.tier ? 'selected' : ''}>${t}</option>`).join('')}</select></td>
+      ${SEVS.map(s => `<td><input class="inl num" type="number" min="1" data-cust="${c.id}" data-ck="sla.${s}" value="${c.sla[s] ?? ''}" placeholder="none" aria-label="${s} SLA in hours"></td>`).join('')}
+      <td><input class="inl" data-cust="${c.id}" data-ck="contact" value="${esc(c.contact)}" aria-label="Contact"></td>
+      <td><label class="check" style="margin:0"><input type="checkbox" data-cust="${c.id}" data-ck="notifyUnaffected" ${c.notifyUnaffected ? 'checked' : ''}>Opt in</label></td>
+      <td class="small" style="white-space:normal;min-width:160px">${esc(usedOn(c).join(', ') || 'not assigned')}</td>
+      <td><button class="btn sm danger" data-act="remove-customer" data-id="${c.id}">Remove</button></td></tr>`).join('')}</tbody>
+  </table></div>
+  <p class="note">Changing the tier resets the SLA hours to that tier’s defaults. Assign customers to environments on each project.</p>`;
+}
+
+/* ---------- environments ---------- */
+function renderEnvs() {
+  const n = S.envs.length;
+  $('#env-list').innerHTML = S.envs.map((e, i) => `
+    <div class="panel env-card">
+      <div class="head">
+        <span class="pos">${i + 1} of ${n}</span>
+        <input class="name" data-env="${e.id}" data-ek="name" value="${esc(e.name)}" aria-label="Environment name">
+        <span class="muted small">${i === n - 1 ? 'Most critical' : i === 0 ? 'Least critical' : ''}</span>
+        <span class="spacer"></span>
+        <button class="btn sm" data-act="env-move" data-id="${e.id}" data-d="-1" ${i === 0 ? 'disabled' : ''}>Move earlier</button>
+        <button class="btn sm" data-act="env-move" data-id="${e.id}" data-d="1" ${i === n - 1 ? 'disabled' : ''}>Move later</button>
+        <button class="btn sm danger" data-act="env-remove" data-id="${e.id}" ${n === 1 ? 'disabled' : ''}>Remove</button>
+      </div>
+      <fieldset><legend>Fallback SLA when no customer is on it (hours, empty means none)</legend>
+        <div class="grid4">${SEVS.map(s => `<label class="f"><span><span class="sev ${s}">${s}</span></span><input type="number" min="1" data-env="${e.id}" data-ek="sla.${s}" value="${e.sla[s] ?? ''}" placeholder="none"></label>`).join('')}</div>
+      </fieldset>
+      <fieldset><legend>When this environment is affected</legend>
+        <label class="check"><input type="checkbox" data-env="${e.id}" data-ek="ticket" ${e.ticket ? 'checked' : ''}>Open a ticket</label>
+        <div class="grid2">
+          <label class="check"><input type="checkbox" data-env="${e.id}" data-ek="slack" ${e.slack ? 'checked' : ''}>Post to Slack</label>
+          <label class="f" style="margin:0 0 8px"><input data-env="${e.id}" data-ek="channel" value="${esc(e.channel)}" aria-label="Slack channel" ${e.slack ? '' : 'disabled'}></label>
+        </div>
+        <label class="f" style="max-width:320px"><span>Page on-call</span><select data-env="${e.id}" data-ek="page">
+          ${[['never','Never'],['critical','Critical only'],['high','High and critical']].map(([v, l]) => `<option value="${v}" ${e.page === v ? 'selected' : ''}>${l}</option>`).join('')}
+        </select></label>
+      </fieldset>
+    </div>`).join('');
+}
+
+/* ---------- lab ---------- */
+function renderLab() {
+  const d = S.draft;
+  const pkgs = uniq(allRepos().filter(x => x.r.ecosystem === d.ecosystem).flatMap(x => x.r.deps.map(y => y.name))).sort();
+  $('#lab-form').innerHTML = `
+    <h2>Presets</h2>
+    <div class="presets">${PRESETS.map((p, i) => `<button class="chip" data-act="preset" data-i="${i}">${esc(p.label)}</button>`).join('')}</div>
+    <div class="grid2">
+      <label class="f"><span>Incident ID</span><input data-k="id" value="${esc(d.id)}"></label>
+      <label class="f"><span>Severity</span><select data-k="severity">${SEVS.map(s => `<option ${s === d.severity ? 'selected' : ''}>${s}</option>`).join('')}</select></label>
+    </div>
+    <label class="f"><span>Summary</span><input data-k="summary" value="${esc(d.summary)}"></label>
+    <label class="f"><span>Details</span><input data-k="details" value="${esc(d.details)}"></label>
+    <div class="grid2">
+      <label class="f"><span>Ecosystem</span><select data-k="ecosystem">${ECOS.map(e => `<option ${e === d.ecosystem ? 'selected' : ''}>${e}</option>`).join('')}</select></label>
+      <label class="f"><span>Package</span><input data-k="package" list="pkg-list" value="${esc(d.package)}"></label>
+    </div>
+    <datalist id="pkg-list">${pkgs.map(p => `<option value="${esc(p)}">`).join('')}</datalist>
+    <div class="grid2">
+      <label class="f"><span>Introduced in</span><input data-k="introduced" class="mono" value="${esc(d.introduced)}" placeholder="0 = all versions"></label>
+      <label class="f"><span>Fixed in</span><input data-k="fixed" class="mono" value="${esc(d.fixed)}" placeholder="Empty = no fix yet"></label>
+    </div>
+    <div class="targets" id="targets"></div>
+    <button class="btn fire" data-act="fire" id="fire-btn">Fire hook</button>`;
+  updateLabPreview();
+}
+function updateLabPreview() {
+  const d = S.draft;
+  $('#payload').textContent = JSON.stringify(payload(d), null, 2);
+  const watched = allRepos().filter(x => x.r.watched), same = watched.filter(x => x.r.ecosystem === d.ecosystem);
+  const t = $('#targets');
+  if (t) t.innerHTML = watched.length
+    ? `<p>Will check main and each deployed environment of <strong>${watched.length}</strong> watched repos (${same.length} on ${esc(d.ecosystem)}).</p>
+       <p>Affected range: <span class="mono">${esc(rangeText(d))}</span></p>
+       <p class="muted small">Deadlines come from the customers on each affected environment.</p>`
+    : `No repos are watched. <a href="#projects">Switch on Watch</a> for at least one repo first.`;
+  const fb = $('#fire-btn'); if (fb) fb.disabled = !watched.length || !d.package.trim() || !d.id.trim();
+}
+
+/* ---------- runs ---------- */
+function runSummary(run) {
+  const aff = run.results.filter(r => r.verdict === 'affected');
+  const done = aff.filter(r => run.repoState[r.repoId].status === 'verified').length;
+  const escd = aff.filter(r => run.repoState[r.repoId].status === 'escalated').length;
+  return {aff, done, escd};
+}
+function renderRuns() {
+  $('#run-list').innerHTML = S.runs.map(r => {
+    const {aff, done, escd} = runSummary(r);
+    return `<li><button class="run-item" data-act="sel-run" data-id="${r.id}" aria-current="${ui.runSel === r.id}">
+      <span class="t"><span class="mono">${esc(r.incident.id)}</span><span class="sev ${r.incident.severity}">${r.incident.severity}</span></span>
+      <span class="tally">${esc(r.incident.package)}, ${aff.length ? `<b>${aff.length} affected</b>, ${done} verified${escd ? ', ' + escd + ' escalated' : ''}` : 'nothing affected'}</span>
+    </button></li>`;
+  }).join('');
+  const run = S.runs.find(r => r.id === ui.runSel) || S.runs[0];
+  if (!run) {
+    $('#run-panel').innerHTML = `<div class="empty"><p>No runs yet. Fire a hook from the incident lab to start the workflow.</p><a class="btn primary" href="#lab">Open incident lab</a></div>`;
+    return;
+  }
+  ui.runSel = run.id;
+  renderRunDetail(run);
+}
+function waitText(run) {
+  const n = run.notify;
+  if (n.status === 'approved') return `Approved ${Math.max(0, Math.round((n.approvedAt - run.firedAt) / 60000))} min after detection.`;
+  const mins = Math.max(0, Math.round((Date.now() - run.firedAt) / 60000));
+  const tight = Math.min(...run.recipients.map(rc => rc.due));
+  if (tight === Infinity) return `Waiting ${mins} min.`;
+  const pct = mins / (tight * 60) * 100;
+  return `Waiting ${mins} min, ${pct.toFixed(1)}% of the tightest SLA (${fmtHours(tight)}). ${pct > 10 ? 'Backup approver pinged.' : 'The backup approver is pinged at 10%.'}`;
+}
+function stepStates(run) {
+  const {aff, done, escd} = runSummary(run);
+  const rows = priority(run), open = rows.filter(x => !FINAL.includes(x.st.status)).length;
+  const valid = run.groups.filter(g => g.recipe.confidence === 'Validated').length;
+  return [
+    ['Incident', 'done', 'Received'],
+    ['Scan', 'done', `${aff.length} affected`],
+    ['Notify customers', run.notify.status === 'pending' ? 'wait' : 'done', run.notify.status === 'pending' ? 'Needs approval' : run.notify.status === 'none' ? 'Nobody to notify' : 'Sent'],
+    ['Group repos', 'done', `${run.groups.length} group${run.groups.length === 1 ? '' : 's'}`],
+    ['Recipes', run.groups.length && valid === run.groups.length ? 'done' : run.groups.length ? 'wait' : 'done', `${valid} of ${run.groups.length} validated`],
+    ['Prioritise', 'done', open ? `${open} open` : 'Queue empty'],
+    ['Fix', aff.length && done + escd === aff.length ? 'done' : aff.length ? 'wait' : 'done', `${done} of ${aff.length} verified`],
+    ['Escalate', escd ? 'bad' : 'done', `${escd} escalated`]
+  ];
+}
+function sec(n, title, pill, body) {
+  return `<section class="step" id="step-${n}"><div class="sh"><span class="n">${n}</span><h3>${title}</h3>${pill}</div>${body}</section>`;
+}
+const PILL = {queued:['Queued',''], pr:['PR open','info'], 'deploy-ready':['Deploy ready','info'], verified:['Verified','ok'], escalated:['Escalated','bad']};
+function pill(text, cls) { return `<span class="pill ${cls || ''}">${esc(text)}</span>`; }
+function envStrip(r) {
+  if (!r.main) return '';
+  const cell = (name, x, rel, extra) => `<div class="e ${x.state}"><b>${esc(name)}</b><span class="v">${x.dep ? esc(x.dep.version) : 'not deployed'}${rel ? ' · ' + esc(rel) : ''}</span><br><span class="st">${VERDICT_LABEL[x.state]}</span>${extra || ''}</div>`;
+  return `<div class="envs">${cell('main', r.main)}${r.envs.map(x => cell(x.name, x, x.release, x.state === 'affected' ? `<br><span class="small muted">${x.customers.length} customer${x.customers.length === 1 ? '' : 's'}, ${fmtHours(x.slaHours)}</span>` : '')).join('')}</div>`;
+}
+function renderRunDetail(run) {
+  const inc = run.incident, {aff} = runSummary(run);
+  const rows = priority(run), states = stepStates(run);
+  const first = aff.filter(r => r.sla).sort((a, b) => a.sla.hours - b.sla.hours)[0];
+  const outbox = run.outbox;
+
+  const s1 = sec(1, 'Incident', '', `<p style="margin:0"><span class="mono">${esc(inc.id)}</span> <span class="sev ${inc.severity}">${inc.severity}</span> ${esc(inc.summary)}</p>
+    <p class="note">${esc(inc.ecosystem)}:${esc(inc.package)}, affected range <span class="mono">${esc(rangeText(inc))}</span>. Received ${new Date(run.firedAt).toLocaleString()}.</p>`);
+
+  const byProj = uniq(run.results.map(r => r.projectId)).map(pid => run.results.filter(r => r.projectId === pid));
+  const s2 = sec(2, 'Scan projects and environments', pill(`${aff.length} affected`, aff.length ? 'bad' : 'ok'), byProj.map(rs => {
+    const shown = rs.filter(r => r.verdict === 'affected' || r.verdict === 'unknown'), rest = rs.filter(r => !shown.includes(r));
+    return `<div class="projblock"><h4>${esc(rs[0].projectName)}</h4>${shown.map(r => `
+      <div class="res ${r.verdict}" style="margin-bottom:8px"><div class="h"><strong>${esc(r.repoName)}</strong><span class="verdict">${VERDICT_LABEL[r.verdict]}</span>
+        ${r.sla ? `<span class="sla">Fix in ${esc(r.sla.env)} by ${esc(fmtDue(run.firedAt + r.sla.hours * 3600e3))}${r.sla.by && r.sla.by !== 'fallback' ? ', set by ' + esc(r.sla.by) : ''}</span>` : ''}</div>
+        <p>${esc(r.note)}</p>${envStrip(r)}</div>`).join('')}
+      ${rest.length ? `<p class="note">Clear: ${rest.map(r => esc(r.repoName)).join(', ')}.</p>` : ''}</div>`;
+  }).join('') || '<p class="muted">No repos were watched.</p>');
+
+  const rc0 = run.recipients[0];
+  const notifyBody = run.notify.status === 'none' ? '<p class="muted">No customer is on an affected environment, so nobody is notified.</p>' : `
+    <p class="note" id="wait">${esc(waitText(run))}</p>
+    ${run.notify.status === 'pending' ? `
+      <label class="f"><span>Subject</span><input class="tpl" data-tpl="notify|subject" value="${esc(run.notify.subject)}"></label>
+      <label class="f"><span>Text, approved once and personalised for each customer: {customer}, {project}, {environment}, {deadline}, {incident}, {severity}</span><textarea class="tpl" data-tpl="notify|body">${esc(run.notify.body)}</textarea></label>
+      ${rc0 ? `<details><summary>Preview for ${esc(custName(run, rc0.id))}</summary><pre class="code">${esc(fill(run.notify.subject, recipientVars(run, rc0)) + '\n\n' + fill(run.notify.body, recipientVars(run, rc0)))}</pre></details>` : ''}` : ''}
+    <div class="tbl-wrap" style="margin-top:12px"><table><thead><tr><th>Customer</th><th>Affected</th><th>Deadline</th><th>Contact</th></tr></thead><tbody>
+      ${run.recipients.map(rc => { const c = run.custs.find(x => x.id === rc.id) || {}; return `<tr><td>${esc(c.name)} <span class="tier">${esc(c.tier)}</span></td><td>${esc(rc.items.map(i => i.project + ' ' + i.env).join(', '))}</td><td>${esc(dueText(run, rc.due))}</td><td class="small">${esc(c.contact)}</td></tr>`; }).join('')}
+      ${run.unaffected.map(id => { const c = run.custs.find(x => x.id === id) || {}; return `<tr><td>${esc(c.name)} <span class="tier">${esc(c.tier)}</span></td><td class="muted">Not affected, opted in to a notice</td><td></td><td class="small">${esc(c.contact)}</td></tr>`; }).join('')}
+    </tbody></table></div>
+    ${run.notify.status === 'pending' ? `<div class="row" style="margin-top:12px"><button class="btn primary" data-act="approve-notify">Approve text and send to ${run.recipients.length + run.unaffected.length} customer${run.recipients.length + run.unaffected.length === 1 ? '' : 's'}</button></div>` : ''}
+    ${resolutionBlock(run)}
+    ${outbox.length ? `<h3>Outbox (${outbox.length})</h3><div class="outbox">${outbox.map(m => `<details><summary>${esc(m.to)}: ${esc(m.subject)}</summary><pre class="code">${esc(m.body)}</pre></details>`).join('')}</div>` : ''}`;
+  const s3 = sec(3, 'Notify customers', pill(states[2][2], states[2][1] === 'wait' ? 'warn' : 'ok'), notifyBody);
+
+  const s4 = sec(4, 'Group repos', pill(`${aff.length} repos, ${run.groups.length} distinct fix${run.groups.length === 1 ? '' : 'es'}`, 'info'), run.groups.length ? run.groups.map(g => `
+    <div class="gcard"><div class="h"><strong>${esc(g.label)}</strong>${pill(`confidence ${g.confidence.toFixed(2)}`, '')}</div>
+      <p>${esc(g.rationale)}</p>
+      <p class="small muted">Repos: ${g.members.map(id => esc(run.results.find(r => r.repoId === id).repoName)).join(', ')}</p></div>`).join('')
+    + '<p class="note">Simulated in this mock. The Routine groups with an LLM using each project’s context; groups below 0.6 confidence become single-repo groups.</p>' : '<p class="muted">Nothing to group.</p>');
+
+  const s5 = sec(5, 'Fix recipes', pill(states[4][2], states[4][1] === 'done' ? 'ok' : 'warn'), run.groups.map(g => { const r = g.recipe; return `
+    <div class="gcard"><div class="h"><strong>${esc(g.label)}</strong>${pill(r.strategy, '')}${pill('Complexity ' + r.complexity, '')}${pill(r.confidence + ', v' + r.version, r.confidence === 'Validated' ? 'ok' : 'warn')}</div>
+      <ol>${r.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>
+      <p><strong>Breaking changes:</strong> ${esc(r.breaking)}</p>
+      <p class="small muted">Verified when: ${esc(r.verify.join(', '))}.</p>
+      ${r.learnings.length ? `<div class="learn">${r.learnings.map(l => `<div><strong>v${l.v}:</strong> ${esc(l.text)}</div>`).join('')}</div>` : ''}</div>`; }).join('') || '<p class="muted">No recipes needed.</p>');
+
+  const s6 = sec(6, 'Prioritise', pill('Recalculated after every repo', ''), rows.length ? `
+    <div class="tbl-wrap"><table><thead><tr><th>#</th><th>Repo</th><th>Deadline</th><th>Complexity</th><th>Customers</th><th>Role</th><th>Status</th></tr></thead><tbody>
+    ${rows.map((x, i) => `<tr style="${FINAL.includes(x.st.status) ? 'opacity:.55' : ''}"><td>${i + 1}</td><td style="white-space:normal;min-width:180px"><strong>${esc(x.r.repoName)}</strong><br><span class="small muted">${esc(x.r.projectName)}, ${esc(x.g.label)}</span></td>
+      <td class="small">${esc(dueText(run, repoDue(x.r)))}</td><td>${x.g.recipe.complexity}</td><td>${custCount(x.r)}</td>
+      <td>${esc(x.role)}${x.role === 'Pilot' && x.g.pilot.review ? ' (review)' : ''}</td><td>${pill(...PILL[x.st.status])}</td></tr>`).join('')}
+    </tbody></table></div>
+    ${run.groups.filter(g => g.pilot).map(g => `<p class="note"><strong>${esc(g.label)}:</strong> pilot is ${esc(run.results.find(r => r.repoId === g.pilot.id).repoName)}. ${esc(g.pilot.reason)}</p>`).join('')}` : '<p class="muted">Nothing to prioritise.</p>');
+
+  const next = rows.find(eligible);
+  const s7 = sec(7, 'Fix repos', pill(states[6][2], states[6][1] === 'done' ? 'ok' : 'warn'), rows.length ? `
+    <div class="row" style="margin-bottom:12px">
+      <button class="btn primary" data-act="run-next" ${next ? '' : 'disabled'}>${next ? `Run next: ${esc(next.r.repoName)} (${esc(next.role.toLowerCase())})` : 'Nothing left to run'}</button>
+      <button class="btn" data-act="run-all" ${next ? '' : 'disabled'}>Run all</button>
+    </div>
+    ${rows.filter(x => x.st.status !== 'queued' || x.st.log.length).map(x => { const key = run.id + x.r.repoId; return `
+      <div class="fixrow"><div class="h"><strong>${esc(x.r.repoName)}</strong>${pill(...PILL[x.st.status])}<span class="small muted">${esc(x.role)}, ${x.st.attempts} attempt${x.st.attempts === 1 ? '' : 's'}</span>
+        <span class="spacer" style="flex:1"></span>
+        ${['pr','deploy-ready','verified'].includes(x.st.status) && x.g.strategy !== 'nofix' ? `<button class="btn sm" data-act="toggle" data-key="${key}">${x.g.strategy === 'deploy' ? 'Deploy request' : 'Pull request'}</button>` : ''}
+        ${x.st.status === 'pr' ? `<button class="btn sm primary" data-act="verify" data-id="${x.r.repoId}">Merge and deploy</button>` : ''}
+        ${x.st.status === 'deploy-ready' ? `<button class="btn sm primary" data-act="verify" data-id="${x.r.repoId}">Approve deploy</button>` : ''}</div>
+        ${x.st.log.length ? `<div class="log">${x.st.log.map(l => `<div>${esc(l)}</div>`).join('')}</div>` : ''}
+        ${ui.open[key] ? `<pre class="code" style="margin-top:8px">${esc(prText(run, x.r, x.g))}</pre>` : ''}</div>`; }).join('')}
+    <p class="note">Simulated: repos without tests fail on anything bigger than a patch update. Merging and deploying stay human; a repo counts as fixed only after the deployed release is re-scanned.</p>` : '<p class="muted">Nothing to fix.</p>');
+
+  const escRows = rows.filter(x => x.st.status === 'escalated'), unknown = run.results.filter(r => r.verdict === 'unknown');
+  const s8 = sec(8, 'Escalate', pill(`${escRows.length} escalated`, escRows.length ? 'bad' : 'ok'), (escRows.length || unknown.length) ? `
+    ${escRows.map(x => `<div class="fixrow"><div class="h"><strong>${esc(x.r.repoName)}</strong>${pill('Ticket for ' + x.r.owner, 'bad')}</div><p class="small">${esc(x.st.reason)}</p><pre class="code">${esc(ticketText(run, x.r, x.g))}</pre></div>`).join('')}
+    ${unknown.map(r => `<div class="fixrow"><div class="h"><strong>${esc(r.repoName)}</strong>${pill('Manual check', 'warn')}</div><p class="small">${esc(r.note)}</p></div>`).join('')}` : '<p class="muted">Nothing escalated.</p>');
+
+  $('#run-panel').innerHTML = `
+    <p class="headline">${aff.length} affected repo${aff.length === 1 ? '' : 's'}, ${run.groups.length} distinct fix${run.groups.length === 1 ? '' : 'es'}, ${run.recipients.length} customer${run.recipients.length === 1 ? '' : 's'} to notify</p>
+    <p class="note" style="margin:0">${first ? `First deadline: ${esc(fmtDue(run.firedAt + first.sla.hours * 3600e3))} for ${esc(first.sla.env)} of ${esc(first.projectName)}${first.sla.by && first.sla.by !== 'fallback' ? ', set by ' + esc(first.sla.by) + '’s contract' : ''}.` : 'No deadline: nothing deployed is affected.'}</p>
+    <div class="stepnav">${states.map(([t, s], i) => `<button class="${s}" data-act="jump" data-n="${i + 1}"><b>${i + 1}</b>${esc(t)}</button>`).join('')}</div>
+    ${s1}${s2}${s3}${s4}${s5}${s6}${s7}${s8}
+    <details><summary>Result JSON (what the Routine writes to its state)</summary><pre class="code">${esc(JSON.stringify({
+      run_id:run.id, incident:inc.id, fired_at:new Date(run.firedAt).toISOString(),
+      notification:{status:run.notify.status, recipients:run.recipients.map(rc => custName(run, rc.id))},
+      groups:run.groups.map(g => ({label:g.label, members:g.members.map(id => run.results.find(r => r.repoId === id).repoName), confidence:g.confidence, recipe:{strategy:g.recipe.strategy, complexity:g.recipe.complexity, version:g.recipe.version, confidence:g.recipe.confidence}})),
+      repos:rows.map(x => ({repo:x.r.repoName, project:x.r.projectName, role:x.role, status:x.st.status, due: x.r.sla ? new Date(run.firedAt + x.r.sla.hours * 3600e3).toISOString() : null}))
+    }, null, 2))}</pre></details>`;
+}
+function resolutionBlock(run) {
+  const ready = resolvable(run);
+  if (!ready.length && !run.resolution.sent.length) return '';
+  return `<h3>Resolution notice</h3>
+    ${ready.length ? `<p class="note">${ready.length} customer${ready.length === 1 ? ' has' : 's have'} every affected project verified as fixed.</p>
+      <label class="f"><span>Subject</span><input class="tpl" data-tpl="resolution|subject" value="${esc(run.resolution.subject)}"></label>
+      <label class="f"><span>Text</span><textarea class="tpl" data-tpl="resolution|body" style="min-height:140px">${esc(run.resolution.body)}</textarea></label>
+      <button class="btn primary" data-act="approve-resolution" ${run.notify.status === 'pending' ? 'disabled' : ''}>Approve text and send to ${listText(ready.map(rc => custName(run, rc.id)))}</button>
+      ${run.notify.status === 'pending' ? '<p class="note">Send the advisory first.</p>' : ''}` : ''}
+    ${run.resolution.sent.length ? `<p class="note">Resolution sent to ${esc(listText(run.resolution.sent.map(id => custName(run, id))))}.</p>` : ''}`;
+}
+
+/* ---------- actions ---------- */
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('on'), 2400); }
+async function copy(text) {
+  try { await navigator.clipboard.writeText(text); toast('Copied to clipboard'); }
+  catch (e) { toast('Copy isn’t available here. Select the text and copy it manually.'); }
+}
+const curRun = () => S.runs.find(r => r.id === ui.runSel);
+function rerenderRun(keepScroll) { const y = window.scrollY; save(); renderRuns(); renderChrome(); if (keepScroll) window.scrollTo(0, y); }
+function fire() {
+  const inc = {...S.draft, package:S.draft.package.trim(), id:S.draft.id.trim()};
+  const run = buildRun(inc);
+  S.runs.unshift(run); S.runs = S.runs.slice(0, 20);
+  S.draft = {...S.draft, id:'DEMO-2026-' + String(Math.floor(1000 + Math.random() * 9000))};
+  save(); ui.runSel = run.id;
+  history.replaceState(null, '', '#runs');
+  setView('runs'); renderChrome(); renderRuns();
+  window.scrollTo({top:0, behavior: reduceMotion ? 'auto' : 'smooth'});
+}
+function addRepoTo(pid, r) {
+  const p = findProj(pid); p.repos.push(r); ui.sel = {kind:'repo', id:r.id};
+  save(); renderProjects(); renderChrome(); toast(`Added ${r.name} with ${r.deps.length} dependencies`);
+}
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  const act = el.dataset.act, id = el.dataset.id;
+  if (act === 'watch') {
+    e.stopPropagation();
+    const f = findRepo(id); f.r.watched = el.checked; save(); renderProjects(); renderChrome(); return;
+  }
+  if (e.target.closest('label.switch') && act === 'sel-repo') return;
+  if (act === 'sel-repo') { ui.sel = {kind:'repo', id}; renderProjects(); }
+  if (act === 'sel-proj') { ui.sel = {kind:'project', id}; renderProjects(); }
+  if (act === 'add-project') { ui.sel = {kind:'add-project'}; renderProjects(); }
+  if (act === 'create-project') {
+    const name = $('#np-name').value.trim() || 'New project', owner = $('#np-owner').value.trim() || 'Unassigned';
+    const p = {id:uid(), name, owner, repos:[], envs:Object.fromEntries(S.envs.map(x => [x.id, {customers:[]}]))};
+    S.projects.push(p); ui.sel = {kind:'project', id:p.id}; save(); renderProjects(); renderChrome(); toast(`Created ${name}`);
+  }
+  if (act === 'remove-project') {
+    const p = findProj(id); S.projects = S.projects.filter(x => x.id !== id); ui.sel = {kind:'project', id:S.projects[0]?.id};
+    save(); renderProjects(); renderChrome(); toast(`Removed ${p.name}`);
+  }
+  if (act === 'add-repo') { ui.sel = {kind:'add-repo', id}; renderProjects(); }
+  if (act === 'mode') { ui.addMode = el.dataset.mode; renderProjects(); }
+  if (act === 'gen') {
+    const eco = $('#fk-eco').value;
+    let name = $('#fk-name').value.trim() || `${pick(NAME_A)}-${pick(NAME_B)}`;
+    while (allRepos().some(x => x.r.name === name)) name += '-2';
+    addRepoTo(id, fakeRepo(name, eco));
+  }
+  if (act === 'parse') {
+    const err = $('#mf-err'); err.textContent = '';
+    let res;
+    try { res = parseManifest($('#mf-text').value); } catch (x) { err.textContent = x.message; return; }
+    const name = $('#mf-name').value.trim() || res.guessName || 'pasted-repo';
+    const deployed = {}; S.envs.forEach(env => deployed[env.id] = true);
+    el.disabled = true; el.textContent = 'Retrieving dependencies…';
+    setTimeout(() => addRepoTo(id, {id:uid(), name, ecosystem:res.ecosystem, watched:true, source:'manifest', tests:'some', deployed, releases:{}, deps:res.deps.map(d => ({...d, env:{}}))}), reduceMotion ? 0 : 650);
+  }
+  if (act === 'reroll') {
+    const {r} = findRepo(id), fresh = fakeRepo(r.name, r.ecosystem);
+    Object.assign(r, {deps:fresh.deps, releases:fresh.releases}); save(); renderProjects(); toast('New versions picked');
+  }
+  if (act === 'remove-repo') {
+    const {r, p} = findRepo(id); p.repos = p.repos.filter(x => x.id !== id); ui.sel = {kind:'project', id:p.id};
+    save(); renderProjects(); renderChrome(); toast(`Removed ${r.name}`);
+  }
+  if (act === 'rm-cust') {
+    const [pid, envId, cid] = el.dataset.key.split('|'), p = findProj(pid);
+    p.envs[envId].customers = p.envs[envId].customers.filter(x => x !== cid); save(); renderProjects();
+  }
+  if (act === 'add-customer') {
+    S.customers.push({id:uid(), name:'New customer', tier:'Standard', sla:{...TIERS.Standard}, contact:'', notifyUnaffected:false});
+    save(); renderCustomers(); renderChrome();
+  }
+  if (act === 'remove-customer') {
+    S.customers = S.customers.filter(c => c.id !== id);
+    S.projects.forEach(p => Object.values(p.envs).forEach(x => { x.customers = x.customers.filter(c => c !== id); }));
+    save(); renderCustomers(); renderChrome();
+  }
+  if (act === 'env-add') {
+    const env = {id:uid(), name:'env-' + (S.envs.length + 1), sla:{critical:24, high:72, medium:null, low:null}, ticket:true, slack:false, channel:'#alerts', page:'never'};
+    S.envs.push(env);
+    S.projects.forEach(p => { p.envs[env.id] = {customers:[]}; p.repos.forEach(r => { r.deployed = r.deployed || {}; r.deployed[env.id] = false; }); });
+    save(); renderEnvs(); toast('Added an environment. Assign customers and deployments on the Projects page.');
+  }
+  if (act === 'env-move') {
+    const i = S.envs.findIndex(x => x.id === id), j = i + +el.dataset.d;
+    [S.envs[i], S.envs[j]] = [S.envs[j], S.envs[i]]; save(); renderEnvs();
+  }
+  if (act === 'env-remove') {
+    const env = S.envs.find(x => x.id === id);
+    S.envs = S.envs.filter(x => x.id !== id);
+    S.projects.forEach(p => { delete p.envs[id]; p.repos.forEach(r => { if (r.deployed) delete r.deployed[id]; if (r.releases) delete r.releases[id]; r.deps.forEach(d => d.env && delete d.env[id]); }); });
+    save(); renderEnvs(); toast(`Removed ${env.name}`);
+  }
+  if (act === 'preset') { S.draft = {...PRESETS[+el.dataset.i]}; save(); renderLab(); }
+  if (act === 'copy-payload') copy($('#payload').textContent);
+  if (act === 'fire') fire();
+  if (act === 'sel-run') { ui.runSel = id; renderRuns(); }
+  if (act === 'jump') { const t = document.getElementById('step-' + el.dataset.n); if (t) t.scrollIntoView({behavior: reduceMotion ? 'auto' : 'smooth', block:'start'}); }
+  const run = curRun();
+  if (act === 'approve-notify' && run) {
+    run.notify.status = 'approved'; run.notify.approvedAt = Date.now();
+    run.recipients.forEach(rc => { const v = recipientVars(run, rc), c = run.custs.find(x => x.id === rc.id); run.outbox.push({to:`${c.name} <${c.contact}>`, subject:fill(run.notify.subject, v), body:fill(run.notify.body, v)}); });
+    run.unaffected.forEach(cid => { const c = run.custs.find(x => x.id === cid), v = {customer:c.name, incident:run.incident.id}; run.outbox.push({to:`${c.name} <${c.contact}>`, subject:fill(UNAFFECTED.subject, v), body:fill(UNAFFECTED.body, v)}); });
+    rerenderRun(true); toast(`Sent to ${run.recipients.length + run.unaffected.length} customers (outbox)`);
+  }
+  if (act === 'approve-resolution' && run) {
+    const ready = resolvable(run);
+    ready.forEach(rc => { const v = recipientVars(run, rc), c = run.custs.find(x => x.id === rc.id); run.outbox.push({to:`${c.name} <${c.contact}>`, subject:fill(run.resolution.subject, v), body:fill(run.resolution.body, v)}); run.resolution.sent.push(rc.id); });
+    rerenderRun(true); toast(`Resolution sent to ${ready.length} customers (outbox)`);
+  }
+  if (act === 'run-next' && run) { const row = priority(run).find(eligible); if (row) { runOne(run, row); rerenderRun(true); } }
+  if (act === 'run-all' && run) { let n = 0, row; while ((row = priority(run).find(eligible)) && n++ < 100) runOne(run, row); rerenderRun(true); }
+  if (act === 'verify' && run) { verify(run, id); rerenderRun(true); }
+  if (act === 'toggle') { ui.open[el.dataset.key] = !ui.open[el.dataset.key]; rerenderRun(true); }
+  if (act === 'reset') {
+    if (el.dataset.armed !== '1') { el.dataset.armed = '1'; el.textContent = 'Click again to reset'; setTimeout(() => { el.dataset.armed = ''; el.textContent = 'Reset demo data'; }, 3000); return; }
+    S = seed(); save(); ui.sel = {kind:'project', id:S.projects[0].id}; ui.runSel = null; ui.open = {};
+    el.dataset.armed = ''; el.textContent = 'Reset demo data'; show(); toast('Demo data reset');
+  }
+});
+document.addEventListener('keydown', e => {
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[role="button"][data-act]')) { e.preventDefault(); e.target.click(); }
+});
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.dataset.k) {
+    S.draft[t.dataset.k] = t.value; save();
+    if (t.dataset.k === 'ecosystem') { renderLab(); return; }
+    updateLabPreview(); return;
+  }
+  if (t.dataset.tpl) {
+    const run = curRun(), [part, field] = t.dataset.tpl.split('|');
+    if (run) { run[part][field] = t.value; save(); }
+  }
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.dataset.tpl) { renderRuns(); return; }
+  if (t.dataset.cell) {
+    const [rid, i, envId] = t.dataset.cell.split('|'), {r} = findRepo(rid), d = r.deps[+i], v = t.value.trim();
+    d.env = d.env || {};
+    if (envId === 'main') { if (v) d.version = v; }
+    else if (!v || v === d.version) delete d.env[envId];
+    else d.env[envId] = v;
+    save(); renderProjects(); return;
+  }
+  if (t.dataset.deploy) {
+    const [rid, envId] = t.dataset.deploy.split('|'), {r} = findRepo(rid);
+    r.deployed = r.deployed || {}; r.deployed[envId] = t.checked; save(); renderProjects(); return;
+  }
+  if (t.dataset.rel) {
+    const [rid, envId] = t.dataset.rel.split('|'), {r} = findRepo(rid);
+    r.releases = r.releases || {}; r.releases[envId] = t.value.trim(); save(); return;
+  }
+  if (t.dataset.tests) { findRepo(t.dataset.tests).r.tests = t.value; save(); renderProjects(); return; }
+  if (t.dataset.addcust) {
+    if (!t.value) return;
+    const [pid, envId] = t.dataset.addcust.split('|'), p = findProj(pid);
+    p.envs[envId] = p.envs[envId] || {customers:[]};
+    p.envs[envId].customers.push(t.value); save(); renderProjects(); return;
+  }
+  if (t.dataset.proj) {
+    const p = findProj(t.dataset.proj); p[t.dataset.pk] = t.value.trim() || p[t.dataset.pk]; save(); renderProjects(); return;
+  }
+  if (t.dataset.cust) {
+    const c = S.customers.find(x => x.id === t.dataset.cust), k = t.dataset.ck;
+    if (k.startsWith('sla.')) { const n = parseInt(t.value, 10); c.sla[k.slice(4)] = n > 0 ? n : null; }
+    else if (k === 'tier') { c.tier = t.value; c.sla = {...TIERS[t.value]}; }
+    else if (k === 'notifyUnaffected') c.notifyUnaffected = t.checked;
+    else c[k] = t.value.trim() || (k === 'name' ? c.name : '');
+    save(); renderCustomers(); return;
+  }
+  if (t.dataset.env) {
+    const env = S.envs.find(x => x.id === t.dataset.env), k = t.dataset.ek;
+    if (k.startsWith('sla.')) { const n = parseInt(t.value, 10); env.sla[k.slice(4)] = n > 0 ? n : null; }
+    else if (k === 'ticket' || k === 'slack') env[k] = t.checked;
+    else if (k === 'name') env.name = t.value.trim() || env.name;
+    else env[k] = t.value;
+    save(); renderEnvs();
+  }
+});
+setInterval(() => { const el = document.getElementById('wait'), run = curRun(); if (el && run && currentView() === 'runs') el.textContent = waitText(run); }, 15000);
+window.addEventListener('hashchange', show);
+show();
+
+</script>
+</body>
+</html>

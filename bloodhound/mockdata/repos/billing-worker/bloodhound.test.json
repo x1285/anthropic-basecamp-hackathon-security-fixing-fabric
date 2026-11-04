@@ -1,7 +1,0 @@
-{
-  "description": "Simulated test rules for billing-worker",
-  "greenWhen": {
-    "jsonwebtoken": ">=9.0.0"
-  },
-  "codeChecks": []
-}

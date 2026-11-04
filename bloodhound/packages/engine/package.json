@@ -6,9 +6,6 @@
   "main": "src/index.ts",
   "types": "src/index.ts",
   "dependencies": {
-    "@bloodhound/core": "workspace:*",
-    "@bloodhound/sandbox": "workspace:*",
-    "@bloodhound/adapters": "workspace:*",
-    "@bloodhound/agent": "workspace:*"
+    "@bloodhound/core": "workspace:*"
   }
 }

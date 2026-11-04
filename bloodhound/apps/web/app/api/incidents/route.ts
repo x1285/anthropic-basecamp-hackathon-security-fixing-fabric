@@ -1,20 +1,18 @@
-// Webhook: receives OSV-style payloads. Returns the run id; the run continues inside the request.
 import { NextResponse } from 'next/server';
-import { ingestIncident } from '@bloodhound/engine';
+import { fireFromPayload } from '@bloodhound/engine';
 
-export const dynamic = 'force-dynamic';
-
+// Webhook: an OSV-style payload starts a run. The lab shows exactly this payload.
 export async function POST(req: Request) {
-  let payload: unknown;
+  let body: unknown;
   try {
-    payload = await req.json();
+    body = await req.json();
   } catch {
-    return NextResponse.json({ error: 'body must be JSON' }, { status: 400 });
+    return NextResponse.json({ error: 'Body must be JSON.' }, { status: 400 });
   }
   try {
-    const { runId } = await ingestIncident(payload as Parameters<typeof ingestIncident>[0]);
-    return NextResponse.json({ runId }, { status: 201 });
+    const res = await fireFromPayload(body);
+    return NextResponse.json({ runId: res.runId, status: 'run started' }, { status: 201 });
   } catch (err) {
-    return NextResponse.json({ error: (err as Error).message }, { status: 422 });
+    return NextResponse.json({ error: (err as Error).message }, { status: 400 });
   }
 }

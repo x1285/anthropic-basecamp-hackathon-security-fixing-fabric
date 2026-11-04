@@ -1,9 +1,0 @@
-{
-  "name": "portal-auth",
-  "version": "1.0.0",
-  "private": true,
-  "dependencies": {
-    "express": "4.18.2",
-    "jsonwebtoken": "9.0.0"
-  }
-}
